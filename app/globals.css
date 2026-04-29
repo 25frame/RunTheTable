@@ -3,6 +3,26 @@
 @tailwind utilities;
 
 :root { color-scheme: dark; }
-html { background: #000; }
-body { margin: 0; background: #000; color: #fff; }
+html { background: #05070a; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(225,6,0,.22), transparent 28%),
+    radial-gradient(circle at 90% 20%, rgba(255,255,255,.08), transparent 22%),
+    linear-gradient(180deg, #070b10 0%, #000 45%, #05070a 100%);
+  color: #fff;
+}
 ::selection { background: #e10600; color: white; }
+.rtt-grain { position: relative; }
+.rtt-grain::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: .08;
+  background-image:
+    linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.35) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, black, transparent 70%);
+}
