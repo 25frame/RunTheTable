@@ -1,22 +1,27 @@
-# RTT NYC Website Starter V2
+# RUN THE TABLE / RTT NYC COMPLETE BUILD
 
-Improved deployable Next.js starter for RTT NYC.
+Clean complete Next.js build with all required folders.
 
-## Local setup
+## Upload to GitHub
 
-```bash
-npm install
-npm run dev
-```
+Use GitHub Desktop. Delete existing repo contents first, then copy this build's contents into repo root.
 
-## Deploy to Vercel
+Repo root must show:
+- app/
+- components/
+- lib/
+- package.json
 
-Use Node.js 22.x if Vercel asks.
+## Vercel
 
-## Admin status
+Framework: Next.js
+Root Directory: ./
+Node.js: 22.x recommended
 
-Admin pages are visual starters. Next step is Supabase writes + authentication.
+## Environment Variables
 
-## Supabase
+Optional but recommended:
+NEXT_PUBLIC_GOOGLE_FORM_URL
+NEXT_PUBLIC_RTT_API_URL
 
-Run `supabase/schema.sql` in Supabase SQL Editor when ready.
+Without them, the site builds with fallback sample data.
