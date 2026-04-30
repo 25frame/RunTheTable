@@ -1,4 +1,4 @@
-const RTT_DEFAULT_FORM_URL = "https://forms.gle/p8wXpUG3paMnk6Fm9";
+const RTT_DEFAULT_FORM_URL = "https://forms.gle/AzfDrw46Pdu55uaH8";
 
 function setupRttApi(spreadsheetId, formUrl) {
   PropertiesService.getScriptProperties().setProperty("RTT_SPREADSHEET_ID", spreadsheetId);
@@ -12,7 +12,7 @@ function doGet(e) {
 
   if (!spreadsheetId) {
     return json_({
-      error: "RTT_SPREADSHEET_ID not set. Run setupRttApi('YOUR_SHEET_ID', 'https://forms.gle/p8wXpUG3paMnk6Fm9').",
+      error: "RTT_SPREADSHEET_ID not set. Run setupRttApi() first.",
       formUrl: formUrl
     });
   }
