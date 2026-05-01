@@ -1,100 +1,89 @@
+/**
+ * RTT Public Data API
+ * Reads public league data from Google Apps Script.
+ */
 export type RTTPlayer = {
-  id: string;
-  name: string;
-  skill: string;
-  rank: number;
-  wins: number;
-  losses: number;
-  points: number;
-  streak: string;
-  photo: string;
-  handle: string;
-  gameDiff: number;
-  pointDiff: number;
+  id: string; name: string; skill: string; rank: number; wins: number; losses: number;
+  points: number; streak: string; photo: string; handle: string; gameDiff: number; pointDiff: number;
 };
-
 export type RTTMatch = {
-  playerA: string;
-  playerB: string;
-  winner: string;
-  score: string;
-  type: string;
+  row: number; eventId: string; matchId: string; type: string; table: string;
+  playerAId: string; playerA: string; playerBId: string; playerB: string;
+  scoreA: number; scoreB: number; winnerId: string; winner: string;
+  verified: boolean; status: string; score: string;
 };
-
 export type RTTWeeklyResult = {
-  week: number;
-  winner: string;
-  players: number;
-  collected: number;
-  prizePool: number;
-  organizerCut: number;
-  first: number;
-  second: number;
-  third: number;
+  week: number; winner: string; players: number; collected: number; organizerCut: number;
+  prizePool: number; first: number; second: number; third: number;
 };
-
+export type RTTPayout = {
+  eventId: string; week: number; paidPlayers: number; totalCollected: number;
+  operationsCut: number; prizePool: number; firstPlaceName: string;
+  firstPlacePayout: number; secondPlacePayout: number; thirdPlacePayout: number;
+};
 export type RTTData = {
-  players: RTTPlayer[];
-  matches: RTTMatch[];
-  weeklyResults: RTTWeeklyResult[];
-  formUrl: string;
+  ok: boolean; updatedAt: string; formUrl: string; players: RTTPlayer[];
+  matches: RTTMatch[]; weeklyResults: RTTWeeklyResult[]; payout: RTTPayout;
 };
 
-const API_URL =
-  process.env.NEXT_PUBLIC_RTT_API_URL ||
-  "https://script.google.com/macros/s/AKfycbycnGdAqxQUpqLAyO9sQ1DfrSzDk94_sf0wBzCVZgDVrqVjZQ3xxIS6AZ39U07Stodd/exec";
-
-const FALLBACK_FORM_URL =
-  process.env.NEXT_PUBLIC_GOOGLE_FORM_URL ||
-  "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform?usp=header";
+const API_URL = process.env.NEXT_PUBLIC_RTT_API_URL || "https://script.google.com/macros/s/AKfycbycnGdAqxQUpqLAyO9sQ1DfrSzDk94_sf0wBzCVZgDVrqVjZQ3xxIS6AZ39U07Stodd/exec";
+const FALLBACK_FORM_URL = process.env.NEXT_PUBLIC_GOOGLE_FORM_URL || "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform?usp=header";
 
 export async function getRTTData(): Promise<RTTData> {
-  const res = await fetch(API_URL, { cache: "no-store" });
-
-  if (!res.ok) {
+  try {
+    const res = await fetch(API_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("RTT API failed");
+    const data = await res.json();
     return {
-      players: [],
-      matches: [],
-      weeklyResults: [],
-      formUrl: FALLBACK_FORM_URL,
+      ok: Boolean(data.ok),
+      updatedAt: data.updatedAt || new Date().toISOString(),
+      formUrl: data.formUrl || FALLBACK_FORM_URL,
+      players: (data.players || []).map(normalizePlayer),
+      matches: (data.matches || []).map(normalizeMatch),
+      weeklyResults: (data.weeklyResults || []).map(normalizeWeeklyResult),
+      payout: normalizePayout(data.payout || {})
+    };
+  } catch {
+    return {
+      ok: false, updatedAt: new Date().toISOString(), formUrl: FALLBACK_FORM_URL,
+      players: [], matches: [], weeklyResults: [], payout: normalizePayout({})
     };
   }
+}
 
-  const data = await res.json();
-
+function normalizePlayer(p: Partial<RTTPlayer>): RTTPlayer {
   return {
-    players: (data.players || []).map((p: Partial<RTTPlayer>) => ({
-      id: p.id || "",
-      name: p.name || "",
-      skill: p.skill || "",
-      rank: p.rank || 0,
-      wins: p.wins || 0,
-      losses: p.losses || 0,
-      points: p.points || 0,
-      streak: p.streak || "",
-      photo: p.photo || "",
-      handle: p.handle || "",
-      gameDiff: p.gameDiff || 0,
-      pointDiff: p.pointDiff || 0,
-    })),
-    matches: (data.matches || []).map((m: Partial<RTTMatch>) => ({
-      playerA: m.playerA || "",
-      playerB: m.playerB || "",
-      winner: m.winner || "",
-      score: m.score || "",
-      type: m.type || "",
-    })),
-    weeklyResults: (data.weeklyResults || []).map((w: Partial<RTTWeeklyResult>) => ({
-      week: w.week || 0,
-      winner: w.winner || "TBD",
-      players: w.players || 0,
-      collected: w.collected || 0,
-      prizePool: w.prizePool || 0,
-      organizerCut: w.organizerCut || 0,
-      first: w.first || 0,
-      second: w.second || 0,
-      third: w.third || 0,
-    })),
-    formUrl: data.formUrl || FALLBACK_FORM_URL,
+    id: p.id || "", name: p.name || "", skill: p.skill || "", rank: Number(p.rank) || 0,
+    wins: Number(p.wins) || 0, losses: Number(p.losses) || 0, points: Number(p.points) || 0,
+    streak: p.streak || "", photo: p.photo || "", handle: p.handle || "",
+    gameDiff: Number(p.gameDiff) || 0, pointDiff: Number(p.pointDiff) || 0
+  };
+}
+function normalizeMatch(m: Partial<RTTMatch>): RTTMatch {
+  const scoreA = Number(m.scoreA) || 0;
+  const scoreB = Number(m.scoreB) || 0;
+  return {
+    row: Number(m.row) || 0, eventId: m.eventId || "", matchId: m.matchId || "",
+    type: m.type || "", table: m.table || "", playerAId: m.playerAId || "",
+    playerA: m.playerA || "", playerBId: m.playerBId || "", playerB: m.playerB || "",
+    scoreA, scoreB, winnerId: m.winnerId || "", winner: m.winner || "",
+    verified: Boolean(m.verified), status: m.status || "", score: m.score || `${scoreA}-${scoreB}`
+  };
+}
+function normalizeWeeklyResult(w: Partial<RTTWeeklyResult>): RTTWeeklyResult {
+  return {
+    week: Number(w.week) || 0, winner: w.winner || "TBD", players: Number(w.players) || 0,
+    collected: Number(w.collected) || 0, organizerCut: Number(w.organizerCut) || 0,
+    prizePool: Number(w.prizePool) || 0, first: Number(w.first) || 0,
+    second: Number(w.second) || 0, third: Number(w.third) || 0
+  };
+}
+function normalizePayout(p: Partial<RTTPayout>): RTTPayout {
+  return {
+    eventId: p.eventId || "EVT-001", week: Number(p.week) || 1,
+    paidPlayers: Number(p.paidPlayers) || 0, totalCollected: Number(p.totalCollected) || 0,
+    operationsCut: Number(p.operationsCut) || 0, prizePool: Number(p.prizePool) || 0,
+    firstPlaceName: p.firstPlaceName || "TBD", firstPlacePayout: Number(p.firstPlacePayout) || 0,
+    secondPlacePayout: Number(p.secondPlacePayout) || 0, thirdPlacePayout: Number(p.thirdPlacePayout) || 0
   };
 }

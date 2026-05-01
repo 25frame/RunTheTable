@@ -9,7 +9,6 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
   const player = players.find((p) => p.id === id);
   if (!player) notFound();
   const winPct = Math.round((player.wins / Math.max(player.wins + player.losses, 1)) * 100);
-
   return (
     <main className="mx-auto min-h-screen max-w-7xl px-5 py-10 text-white">
       <section className="grid gap-5 md:grid-cols-[1.1fr_0.9fr]">
@@ -18,7 +17,7 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
       </section>
       <section className="mt-6 grid gap-6 md:grid-cols-2">
         <Card><p className="text-xs font-black uppercase tracking-[0.3em] text-rtt-red">Metrics</p><h2 className="mt-2 text-3xl font-black italic uppercase">Ranking</h2><div className="mt-5 space-y-3"><div className="flex justify-between rounded-2xl bg-white/5 p-4"><span>Game Diff</span><b>{player.gameDiff > 0 ? "+" : ""}{player.gameDiff}</b></div><div className="flex justify-between rounded-2xl bg-white/5 p-4"><span>Point Diff</span><b>{player.pointDiff > 0 ? "+" : ""}{player.pointDiff}</b></div><div className="flex justify-between rounded-2xl bg-white/5 p-4"><span>Streak</span><b className="text-rtt-red">{player.streak || "Active"}</b></div></div></Card>
-        <Card><p className="text-xs font-black uppercase tracking-[0.3em] text-rtt-red">Matches</p><h2 className="mt-2 text-3xl font-black italic uppercase">Recent Log</h2><div className="mt-5 space-y-3">{matches.filter((m) => m.playerA === player.name || m.playerB === player.name).slice(0, 6).map((m, i) => (<div key={i} className="rounded-2xl bg-white/5 p-4"><p className="font-black uppercase">{m.playerA} vs {m.playerB}</p><p className="text-sm text-white/55">{m.score} · Winner: {m.winner}</p></div>))}</div></Card>
+        <Card><p className="text-xs font-black uppercase tracking-[0.3em] text-rtt-red">Matches</p><h2 className="mt-2 text-3xl font-black italic uppercase">Recent Log</h2><div className="mt-5 space-y-3">{matches.filter((m) => m.playerA === player.name || m.playerB === player.name).slice(0, 6).map((m) => (<div key={`${m.matchId}-${m.row}`} className="rounded-2xl bg-white/5 p-4"><p className="font-black uppercase">{m.playerA} vs {m.playerB}</p><p className="text-sm text-white/55">{m.score} · Winner: {m.winner || "TBD"}</p></div>))}</div></Card>
       </section>
     </main>
   );

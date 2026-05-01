@@ -12,6 +12,7 @@ body {
     linear-gradient(180deg, #070B10 0%, #000 48%, #05070A 100%);
 }
 * { box-sizing: border-box; }
+button, a { -webkit-tap-highlight-color: transparent; }
 .rtt-grid { position: relative; }
 .rtt-grid:before {
   content: "";
@@ -25,4 +26,3 @@ body {
   background-size: 44px 44px;
   mask-image: linear-gradient(to bottom, black, transparent 70%);
 }
-button, a { -webkit-tap-highlight-color: transparent; }

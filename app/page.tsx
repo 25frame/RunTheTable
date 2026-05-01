@@ -24,7 +24,6 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
-
           <Card className="flex flex-col justify-between border-rtt-red/40 bg-rtt-red/10">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.28em] text-rtt-red">Latest Winner</p>
@@ -41,15 +40,10 @@ export default async function HomePage() {
             </div>
           </Card>
         </div>
-
         <div className="mt-10 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.28em] text-rtt-red">Live League Board</p>
-            <h2 className="mt-2 text-4xl font-black italic uppercase">Top Players</h2>
-          </div>
+          <div><p className="text-xs font-black uppercase tracking-[0.28em] text-rtt-red">Live League Board</p><h2 className="mt-2 text-4xl font-black italic uppercase">Top Players</h2></div>
           <Link href="/players" className="text-sm font-black uppercase tracking-[0.2em] text-white/55 hover:text-white">All Players →</Link>
         </div>
-
         <div className="mt-5 grid gap-4 md:grid-cols-4">
           {top.map((p) => (
             <Link key={p.id} href={`/players/${p.id}`}>

@@ -5,7 +5,6 @@ import { Card } from "@/components/Card";
 export default async function StandingsPage() {
   const { players } = await getRTTData();
   const sorted = [...players].sort((a, b) => a.rank - b.rank);
-
   return (
     <main className="mx-auto min-h-screen max-w-7xl px-5 py-8 text-white">
       <p className="text-xs font-black uppercase tracking-[0.3em] text-rtt-red">League Board</p>
