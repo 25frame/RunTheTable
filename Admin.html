@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background:#05070A; color:#fff; }
+    header { padding:24px; border-bottom:1px solid rgba(255,255,255,.12); background:#000; position:sticky; top:0; z-index:2; }
+    h1 { margin:0; font-size:34px; font-style:italic; letter-spacing:-1px; }
+    h2 { margin:0 0 12px; font-size:22px; text-transform:uppercase; }
+    p { color:rgba(255,255,255,.65); }
+    main { padding:24px; max-width:1200px; margin:auto; }
+    .grid { display:grid; gap:16px; }
+    .cols { grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); }
+    .card { border:1px solid rgba(255,255,255,.12); border-radius:24px; padding:18px; background:rgba(255,255,255,.055); box-shadow:0 20px 50px rgba(0,0,0,.4); }
+    button { cursor:pointer; border:0; border-radius:14px; padding:12px 16px; background:#E10600; color:white; font-weight:900; text-transform:uppercase; letter-spacing:.08em; }
+    button.secondary { background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); }
+    input, select { width:100%; padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:#111; color:#fff; box-sizing:border-box; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th, td { text-align:left; border-bottom:1px solid rgba(255,255,255,.1); padding:10px; vertical-align:middle; }
+    th { color:#E10600; text-transform:uppercase; font-size:11px; letter-spacing:.12em; }
+    .row { display:flex; gap:10px; align-items:center; }
+    .status { margin-top:12px; color:#fff; font-weight:bold; }
+    .small { font-size:12px; color:rgba(255,255,255,.5); }
+  </style>
+</head>
+<body>
+<header>
+  <h1>RTT NYC Admin</h1>
+  <p>Control player sync, check-in, matches, standings, and payouts from one page.</p>
+</header>
+
+<main class="grid">
+  <section class="grid cols">
+    <div class="card">
+      <h2>System</h2>
+      <p>Active Event: <b id="activeEvent">Loading...</b></p>
+      <p class="small">Signup Form: <a id="formLink" href="#" target="_blank" style="color:#E10600;">Open Form</a></p>
+      <div class="row">
+        <button onclick="syncForms()">Sync Form</button>
+        <button class="secondary" onclick="refresh()">Refresh</button>
+      </div>
+      <div id="systemStatus" class="status"></div>
+    </div>
+
+    <div class="card">
+      <h2>Matches</h2>
+      <p>Generate first-round matches from checked-in or paid players.</p>
+      <button onclick="generateMatches()">Generate Matches</button>
+      <div id="matchStatus" class="status"></div>
+    </div>
+
+    <div class="card">
+      <h2>Standings / Payouts</h2>
+      <p>Recalculate standings and set 1st, 2nd, 3rd from current ranking.</p>
+      <div class="row">
+        <button onclick="recalc()">Recalculate</button>
+        <button class="secondary" onclick="setPayouts()">Set Payouts</button>
+      </div>
+      <div id="calcStatus" class="status"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Check-In / Payments</h2>
+    <div id="registrations"></div>
+  </section>
+
+  <section class="card">
+    <h2>Match Score Entry</h2>
+    <div id="matches"></div>
+  </section>
+
+  <section class="card">
+    <h2>Standings</h2>
+    <div id="standings"></div>
+  </section>
+</main>
+
+<script>
+let DATA = null;
+
+function setStatus(id, msg) {
+  document.getElementById(id).textContent = msg || "";
+}
+
+function refresh() {
+  google.script.run
+    .withSuccessHandler(render)
+    .withFailureHandler(err => setStatus("systemStatus", String(err)))
+    .getAdminData();
+}
+
+function render(data) {
+  DATA = data;
+  document.getElementById("activeEvent").textContent = data.activeEventId || "";
+  document.getElementById("formLink").href = data.formUrl || "#";
+  renderRegistrations(data.registrations || []);
+  renderMatches(data.matches || []);
+  renderStandings(data.standings || []);
+}
+
+function renderRegistrations(rows) {
+  let html = '<table><tr><th>Player</th><th>Skill</th><th>Checked In</th><th>Paid</th><th>Amount</th><th>Method</th><th>Action</th></tr>';
+  rows.forEach(r => {
+    html += `<tr>
+      <td><b>${r.displayName}</b><div class="small">${r.playerId}</div></td>
+      <td>${r.skill}</td>
+      <td><input type="checkbox" id="ci_${r.playerId}" ${r.checkedIn ? "checked" : ""}></td>
+      <td><input type="checkbox" id="paid_${r.playerId}" ${r.paid ? "checked" : ""}></td>
+      <td><input id="amt_${r.playerId}" value="${r.amountPaid || 0}" style="width:80px;"></td>
+      <td><input id="method_${r.playerId}" value="${r.paymentMethod || ""}" style="width:100px;"></td>
+      <td><button onclick="saveCheckIn('${r.playerId}')">Save</button></td>
+    </tr>`;
+  });
+  html += '</table>';
+  document.getElementById("registrations").innerHTML = html;
+}
+
+function renderMatches(rows) {
+  let html = '<table><tr><th>Match</th><th>Players</th><th>Score A</th><th>Score B</th><th>Winner</th><th>Action</th></tr>';
+  rows.forEach(m => {
+    html += `<tr>
+      <td><b>${m.matchId}</b><div class="small">${m.round} / ${m.table}</div></td>
+      <td>${m.playerA} vs ${m.playerB}</td>
+      <td><input id="sa_${m.row}" value="${m.scoreA || ""}" style="width:70px;"></td>
+      <td><input id="sb_${m.row}" value="${m.scoreB || ""}" style="width:70px;"></td>
+      <td>${m.winner || ""}</td>
+      <td><button onclick="saveMatch(${m.row})">Save Score</button></td>
+    </tr>`;
+  });
+  html += '</table>';
+  document.getElementById("matches").innerHTML = html;
+}
+
+function renderStandings(rows) {
+  let html = '<table><tr><th>Rank</th><th>Player</th><th>Record</th><th>Points</th><th>Diff</th></tr>';
+  rows.forEach(s => {
+    html += `<tr>
+      <td>#${s.rank}</td>
+      <td><b>${s.name}</b><div class="small">${s.id}</div></td>
+      <td>${s.wins}-${s.losses}</td>
+      <td>${s.points}</td>
+      <td>${s.pointDiff}</td>
+    </tr>`;
+  });
+  html += '</table>';
+  document.getElementById("standings").innerHTML = html;
+}
+
+function syncForms() {
+  setStatus("systemStatus", "Syncing...");
+  google.script.run.withSuccessHandler(res => {
+    setStatus("systemStatus", res.message + " Added players: " + (res.addedPlayers || 0) + ". Added registrations: " + (res.addedRegistrations || 0));
+    refresh();
+  }).syncFormResponses();
+}
+
+function generateMatches() {
+  setStatus("matchStatus", "Generating...");
+  google.script.run.withSuccessHandler(res => {
+    setStatus("matchStatus", res.message);
+    refresh();
+  }).generateMatches();
+}
+
+function recalc() {
+  setStatus("calcStatus", "Recalculating...");
+  google.script.run.withSuccessHandler(res => {
+    setStatus("calcStatus", res.message);
+    refresh();
+  }).recalcStandings();
+}
+
+function setPayouts() {
+  setStatus("calcStatus", "Setting payouts...");
+  google.script.run.withSuccessHandler(res => {
+    setStatus("calcStatus", res.message);
+    refresh();
+  }).setPayoutFromStandings();
+}
+
+function saveCheckIn(playerId) {
+  const payload = {
+    playerId,
+    checkedIn: document.getElementById("ci_" + playerId).checked,
+    paid: document.getElementById("paid_" + playerId).checked,
+    amountPaid: document.getElementById("amt_" + playerId).value,
+    paymentMethod: document.getElementById("method_" + playerId).value,
+    status: "Checked In"
+  };
+  google.script.run.withSuccessHandler(res => {
+    setStatus("systemStatus", res.message);
+    refresh();
+  }).updateCheckIn(payload);
+}
+
+function saveMatch(row) {
+  const payload = {
+    row,
+    scoreA: document.getElementById("sa_" + row).value,
+    scoreB: document.getElementById("sb_" + row).value
+  };
+  google.script.run.withSuccessHandler(res => {
+    setStatus("matchStatus", res.message);
+    refresh();
+  }).recordMatch(payload);
+}
+
+refresh();
+</script>
+</body>
+</html>

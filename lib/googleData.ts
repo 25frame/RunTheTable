@@ -41,13 +41,23 @@ export type RTTData = {
 };
 
 const API_URL =
+  process.env.NEXT_PUBLIC_RTT_API_URL ||
   "https://script.google.com/macros/s/AKfycbycnGdAqxQUpqLAyO9sQ1DfrSzDk94_sf0wBzCVZgDVrqVjZQ3xxIS6AZ39U07Stodd/exec";
+
+const FALLBACK_FORM_URL =
+  process.env.NEXT_PUBLIC_GOOGLE_FORM_URL ||
+  "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform?usp=header";
 
 export async function getRTTData(): Promise<RTTData> {
   const res = await fetch(API_URL, { cache: "no-store" });
 
   if (!res.ok) {
-    throw new Error("RTT API failed");
+    return {
+      players: [],
+      matches: [],
+      weeklyResults: [],
+      formUrl: FALLBACK_FORM_URL,
+    };
   }
 
   const data = await res.json();
@@ -67,7 +77,13 @@ export async function getRTTData(): Promise<RTTData> {
       gameDiff: p.gameDiff || 0,
       pointDiff: p.pointDiff || 0,
     })),
-    matches: data.matches || [],
+    matches: (data.matches || []).map((m: Partial<RTTMatch>) => ({
+      playerA: m.playerA || "",
+      playerB: m.playerB || "",
+      winner: m.winner || "",
+      score: m.score || "",
+      type: m.type || "",
+    })),
     weeklyResults: (data.weeklyResults || []).map((w: Partial<RTTWeeklyResult>) => ({
       week: w.week || 0,
       winner: w.winner || "TBD",
@@ -79,6 +95,6 @@ export async function getRTTData(): Promise<RTTData> {
       second: w.second || 0,
       third: w.third || 0,
     })),
-    formUrl: data.formUrl || "",
+    formUrl: data.formUrl || FALLBACK_FORM_URL,
   };
 }

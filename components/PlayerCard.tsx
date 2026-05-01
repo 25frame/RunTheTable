@@ -21,6 +21,7 @@ export function PlayerCard({ player }: { player: RTTPlayer }) {
               }
             />
           </div>
+
           <div className="p-5">
             <p className="text-xs font-black uppercase tracking-[0.22em] text-rtt-red">
               Rank #{player.rank}
