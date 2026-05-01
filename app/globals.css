@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 html { background: #05070A; }
-
 body {
   margin: 0;
   color: white;
@@ -12,11 +11,8 @@ body {
     radial-gradient(circle at 90% 10%, rgba(255,255,255,.08), transparent 24%),
     linear-gradient(180deg, #070B10 0%, #000 48%, #05070A 100%);
 }
-
 * { box-sizing: border-box; }
-
 .rtt-grid { position: relative; }
-
 .rtt-grid:before {
   content: "";
   position: absolute;
@@ -29,3 +25,4 @@ body {
   background-size: 44px 44px;
   mask-image: linear-gradient(to bottom, black, transparent 70%);
 }
+button, a { -webkit-tap-highlight-color: transparent; }
