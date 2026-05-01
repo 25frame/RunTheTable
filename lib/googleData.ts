@@ -7,10 +7,10 @@ export type RTTPlayer = {
   losses: number;
   points: number;
   streak: string;
-  photo?: string;
-  handle?: string;
-  gameDiff?: number;
-  pointDiff?: number;
+  photo: string;
+  handle: string;
+  gameDiff: number;
+  pointDiff: number;
 };
 
 export type RTTMatch = {
@@ -49,7 +49,20 @@ export async function getRTTData(): Promise<RTTData> {
   const data = await res.json();
 
   return {
-    players: data.players || [],
+    players: (data.players || []).map((p: Partial<RTTPlayer>) => ({
+      id: p.id || "",
+      name: p.name || "",
+      skill: p.skill || "",
+      rank: p.rank || 0,
+      wins: p.wins || 0,
+      losses: p.losses || 0,
+      points: p.points || 0,
+      streak: p.streak || "",
+      photo: p.photo || "",
+      handle: p.handle || "",
+      gameDiff: p.gameDiff || 0,
+      pointDiff: p.pointDiff || 0,
+    })),
     matches: data.matches || [],
     weeklyResults: data.weeklyResults || [],
     formUrl: data.formUrl || "",
