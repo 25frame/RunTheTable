@@ -52,7 +52,7 @@ export default async function HomePage() {
 
         <div className="mt-5 grid gap-4 md:grid-cols-4">
           {top.map((p) => {
-            const photo = p.photo || "https://images.unsplash.com/photo-1519861531473-9200262188bf?auto=format&fit=crop&w=900&q=80";
+          const photo = p.photo && p.photo.trim() !== "" ? p.photo : "/rtt-logo.png";
             return (
               <Link key={p.id} href={`/players/${p.id}`}>
                 <Card className="group overflow-hidden p-0 transition hover:-translate-y-1 hover:border-rtt-red/70">
