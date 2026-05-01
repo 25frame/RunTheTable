@@ -1,11 +1,4 @@
-/**
- * Browser-only admin session helper.
- *
- * NOTE FOR CODERS:
- * This is UX protection, not backend security.
- * Backend security is enforced by Apps Script doPost() checking ADMIN_KEY.
- */
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "rtt_Lx7jeZN05FlwPSG88PxUN7T41jJd";
+const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || "";
 const STORAGE_KEY = "rtt_admin_key";
 
 export function login(password: string) {
@@ -13,6 +6,7 @@ export function login(password: string) {
     window.sessionStorage.setItem(STORAGE_KEY, password);
     return true;
   }
+
   return false;
 }
 

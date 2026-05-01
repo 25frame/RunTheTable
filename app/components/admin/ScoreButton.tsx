@@ -17,7 +17,10 @@ export function ScoreButton({
         : "bg-rtt-red text-white";
 
   return (
-    <button onClick={onClick} className={`${cls} rounded-2xl px-6 py-5 text-xl font-black uppercase shadow-lg transition active:scale-95`}>
+    <button
+      onClick={onClick}
+      className={`${cls} rounded-2xl px-6 py-5 text-xl font-black uppercase shadow-lg transition active:scale-95`}
+    >
       {children}
     </button>
   );
