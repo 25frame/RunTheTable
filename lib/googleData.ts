@@ -22,11 +22,15 @@ export type RTTMatch = {
 };
 
 export type RTTWeeklyResult = {
+  week: number;
   winner: string;
   players: number;
   collected: number;
   prizePool: number;
+  organizerCut: number;
   first: number;
+  second: number;
+  third: number;
 };
 
 export type RTTData = {
@@ -64,7 +68,17 @@ export async function getRTTData(): Promise<RTTData> {
       pointDiff: p.pointDiff || 0,
     })),
     matches: data.matches || [],
-    weeklyResults: data.weeklyResults || [],
+    weeklyResults: (data.weeklyResults || []).map((w: Partial<RTTWeeklyResult>) => ({
+      week: w.week || 0,
+      winner: w.winner || "TBD",
+      players: w.players || 0,
+      collected: w.collected || 0,
+      prizePool: w.prizePool || 0,
+      organizerCut: w.organizerCut || 0,
+      first: w.first || 0,
+      second: w.second || 0,
+      third: w.third || 0,
+    })),
     formUrl: data.formUrl || "",
   };
 }
