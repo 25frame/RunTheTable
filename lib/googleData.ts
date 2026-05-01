@@ -8,6 +8,17 @@ export type RTTPlayer = {
   points: number;
   streak: string;
   photo?: string;
+  handle?: string;
+  gameDiff?: number;
+  pointDiff?: number;
+};
+
+export type RTTMatch = {
+  playerA: string;
+  playerB: string;
+  winner: string;
+  score: string;
+  type: string;
 };
 
 export type RTTWeeklyResult = {
@@ -20,6 +31,7 @@ export type RTTWeeklyResult = {
 
 export type RTTData = {
   players: RTTPlayer[];
+  matches: RTTMatch[];
   weeklyResults: RTTWeeklyResult[];
   formUrl: string;
 };
@@ -38,6 +50,7 @@ export async function getRTTData(): Promise<RTTData> {
 
   return {
     players: data.players || [],
+    matches: data.matches || [],
     weeklyResults: data.weeklyResults || [],
     formUrl: data.formUrl || "",
   };
