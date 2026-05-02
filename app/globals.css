@@ -27,3 +27,100 @@ button, a { -webkit-tap-highlight-color: transparent; }
   mask-image: linear-gradient(to bottom, black, transparent 70%);
 }
 input { color-scheme: dark; }
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeOut 0.5s ease forwards;
+  animation-delay: 3s;
+}
+
+.intro-content {
+  display: flex;
+  gap: 40px;
+  font-size: 48px;
+  font-weight: bold;
+  color: white;
+  animation: zoomIn 0.6s ease;
+}
+
+.player {
+  opacity: 0;
+  animation: slideIn 0.8s forwards;
+}
+
+.player.left {
+  animation-delay: 0.2s;
+}
+
+.player.right {
+  animation-delay: 0.4s;
+}
+
+.vs {
+  color: red;
+  animation: pulse 1s infinite;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.8); }
+  to { transform: scale(1); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, #000 40%, #111);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeOut 0.5s ease forwards;
+  animation-delay: 3.5s;
+}
+
+.win-text {
+  text-align: center;
+  color: gold;
+  animation: pop 0.5s ease;
+}
+
+.win-text .label {
+  font-size: 24px;
+  letter-spacing: 4px;
+}
+
+.win-text .name {
+  font-size: 56px;
+  font-weight: bold;
+  margin-top: 10px;
+  animation: glow 1s infinite alternate;
+}
+
+@keyframes pop {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px gold; }
+  to { text-shadow: 0 0 25px orange; }
+}
