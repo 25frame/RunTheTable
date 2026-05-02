@@ -1,9 +1,25 @@
-RTT NYC PRODUCTION SYSTEM
-=========================
+RTT FULL AUTH + PHOTO PRODUCTION RELEASE
+========================================
 
-ADMIN PASSWORD / KEY
---------------------
-rtt_vQWj1twDDrrciUqULZrRlEdRKjJKOQhRpnbs
+This is a full replace-all package with:
+- token-based login
+- admin/player roles
+- player profile editing
+- player photo upload to Google Drive
+- live scoring tap UI
+- public live scoreboard
+- mobile-safe pages
+- complete Apps Script backend
+
+DEFAULT ADMIN LOGIN
+-------------------
+Email:
+admin@rttnyc.com
+
+Password:
+ChangeMeAdmin123!
+
+Change this after install in the Users tab.
 
 INSTALL WEBSITE
 ---------------
@@ -23,27 +39,47 @@ https://script.google.com/macros/s/AKfycbycnGdAqxQUpqLAyO9sQ1DfrSzDk94_sf0wBzCVZ
 NEXT_PUBLIC_GOOGLE_FORM_URL
 https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform?usp=header
 
-NEXT_PUBLIC_ADMIN_KEY
-rtt_vQWj1twDDrrciUqULZrRlEdRKjJKOQhRpnbs
+No NEXT_PUBLIC_ADMIN_KEY is required anymore.
 
 INSTALL APPS SCRIPT
 -------------------
 1. Open Apps Script.
-2. Delete old duplicate .gs files if they define doGet, doPost, RTT_SHEET_ID, or ADMIN_KEY.
+2. Delete old duplicate .gs files if they define doGet or doPost.
 3. Replace Code.gs with google-apps-script/Code.gs from this package.
 4. Save.
-5. Run runSetup.
-6. Run syncFormToSystem.
-7. Run recalcStandings.
+5. Run runSetup().
+6. Run syncFormToSystem().
+7. Run recalcStandings().
 8. Deploy > Manage deployments > Edit > Deploy.
 
-ADMIN URL
----------
-https://YOUR-VERCEL-DOMAIN/admin/login
+SHEET REQUIREMENT
+-----------------
+The backend creates a Users tab if missing.
 
-LIVE SCORING
-------------
-1. Open /admin/matches.
-2. Select match.
-3. Tap +1 / -1.
-4. Save Final Result when win by 2.
+Users tab columns:
+userId | email | password | role | playerId
+
+Admin example:
+USR-001 | admin@rttnyc.com | ChangeMeAdmin123! | admin |
+
+Player example:
+USR-002 | player@email.com | 1234 | player | PLY-001
+
+PLAYER FLOW
+-----------
+1. Player logs in at /login.
+2. Player is sent to /players/[playerId]/edit.
+3. Player can edit name, handle, and upload photo.
+4. Photo saves to Google Drive folder: RTT Player Photos.
+5. Photo URL is written to Players column I.
+
+ADMIN FLOW
+----------
+1. Admin logs in at /login.
+2. Admin lands on /admin/dashboard.
+3. Admin can score live matches and sync/recalculate.
+
+SECURITY
+--------
+Tokens are HMAC-signed and expire after 7 days.
+Passwords are currently plain text in the Users sheet. Next recommended upgrade is password hashing.

@@ -26,3 +26,4 @@ button, a { -webkit-tap-highlight-color: transparent; }
   background-size: 44px 44px;
   mask-image: linear-gradient(to bottom, black, transparent 70%);
 }
+input { color-scheme: dark; }

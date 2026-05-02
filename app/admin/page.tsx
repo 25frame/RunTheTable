@@ -1,6 +1,2 @@
 import { redirect } from "next/navigation";
-
-/** Redirect /admin to login; prevents old Apps Script JSON behavior. */
-export default function AdminRootPage() {
-  redirect("/admin/login");
-}
+export default function AdminRootPage() { redirect("/admin/dashboard"); }

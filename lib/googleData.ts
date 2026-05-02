@@ -1,7 +1,3 @@
-/**
- * RTT Public Data API
- * Reads public league data from Google Apps Script.
- */
 export type RTTPlayer = {
   id: string; name: string; skill: string; rank: number; wins: number; losses: number;
   points: number; streak: string; photo: string; handle: string; gameDiff: number; pointDiff: number;
@@ -44,10 +40,7 @@ export async function getRTTData(): Promise<RTTData> {
       payout: normalizePayout(data.payout || {})
     };
   } catch {
-    return {
-      ok: false, updatedAt: new Date().toISOString(), formUrl: FALLBACK_FORM_URL,
-      players: [], matches: [], weeklyResults: [], payout: normalizePayout({})
-    };
+    return { ok: false, updatedAt: new Date().toISOString(), formUrl: FALLBACK_FORM_URL, players: [], matches: [], weeklyResults: [], payout: normalizePayout({}) };
   }
 }
 
@@ -71,19 +64,8 @@ function normalizeMatch(m: Partial<RTTMatch>): RTTMatch {
   };
 }
 function normalizeWeeklyResult(w: Partial<RTTWeeklyResult>): RTTWeeklyResult {
-  return {
-    week: Number(w.week) || 0, winner: w.winner || "TBD", players: Number(w.players) || 0,
-    collected: Number(w.collected) || 0, organizerCut: Number(w.organizerCut) || 0,
-    prizePool: Number(w.prizePool) || 0, first: Number(w.first) || 0,
-    second: Number(w.second) || 0, third: Number(w.third) || 0
-  };
+  return { week: Number(w.week) || 0, winner: w.winner || "TBD", players: Number(w.players) || 0, collected: Number(w.collected) || 0, organizerCut: Number(w.organizerCut) || 0, prizePool: Number(w.prizePool) || 0, first: Number(w.first) || 0, second: Number(w.second) || 0, third: Number(w.third) || 0 };
 }
 function normalizePayout(p: Partial<RTTPayout>): RTTPayout {
-  return {
-    eventId: p.eventId || "EVT-001", week: Number(p.week) || 1,
-    paidPlayers: Number(p.paidPlayers) || 0, totalCollected: Number(p.totalCollected) || 0,
-    operationsCut: Number(p.operationsCut) || 0, prizePool: Number(p.prizePool) || 0,
-    firstPlaceName: p.firstPlaceName || "TBD", firstPlacePayout: Number(p.firstPlacePayout) || 0,
-    secondPlacePayout: Number(p.secondPlacePayout) || 0, thirdPlacePayout: Number(p.thirdPlacePayout) || 0
-  };
+  return { eventId: p.eventId || "EVT-001", week: Number(p.week) || 1, paidPlayers: Number(p.paidPlayers) || 0, totalCollected: Number(p.totalCollected) || 0, operationsCut: Number(p.operationsCut) || 0, prizePool: Number(p.prizePool) || 0, firstPlaceName: p.firstPlaceName || "TBD", firstPlacePayout: Number(p.firstPlacePayout) || 0, secondPlacePayout: Number(p.secondPlacePayout) || 0, thirdPlacePayout: Number(p.thirdPlacePayout) || 0 };
 }
