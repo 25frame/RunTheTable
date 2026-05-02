@@ -26,14 +26,13 @@ export async function POST(req: Request) {
   const text = await res.text();
 
   if (text.trim().startsWith("<")) {
-    return Response.json(
-      {
-        ok: false,
-        error: "Apps Script returned HTML instead of JSON. Redeploy Apps Script as Web App: Execute as Me, Access Anyone, New version.",
-        preview: text.slice(0, 200),
-      },
-      { status: 500 }
-    );
+    return Response.json({
+      ok: false,
+      error: "Apps Script returned HTML instead of JSON.",
+      status: res.status,
+      contentType: res.headers.get("content-type"),
+      preview: text.slice(0, 500),
+    });
   }
 
   return new Response(text, {
