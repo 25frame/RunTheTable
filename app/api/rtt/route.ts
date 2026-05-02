@@ -3,7 +3,9 @@ const RTT_API_URL =
 
 export async function GET() {
   const res = await fetch(RTT_API_URL, { cache: "no-store" });
-  return new Response(await res.text(), {
+  const text = await res.text();
+
+  return new Response(text, {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
@@ -14,12 +16,25 @@ export async function POST(req: Request) {
 
   const res = await fetch(RTT_API_URL, {
     method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
     body,
     redirect: "follow",
   });
 
   const text = await res.text();
+
+  if (text.trim().startsWith("<")) {
+    return Response.json(
+      {
+        ok: false,
+        error: "Apps Script returned HTML instead of JSON. Redeploy Apps Script as Web App: Execute as Me, Access Anyone, New version.",
+        preview: text.slice(0, 200),
+      },
+      { status: 500 }
+    );
+  }
 
   return new Response(text, {
     status: 200,
