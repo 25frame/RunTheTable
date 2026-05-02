@@ -4,11 +4,18 @@ import { useState } from "react";
 import { supabase, BUCKET } from "@/lib/supabaseClient";
 import { authedPost } from "@/lib/auth";
 
-export function PhotoUploader({ playerId, currentPhoto }) {
-  const [preview, setPreview] = useState(currentPhoto || "");
+type PhotoUploaderProps = {
+  playerId: string;
+  currentPhoto?: string;
+};
+
+export function PhotoUploader({ playerId, currentPhoto = "" }: PhotoUploaderProps) {
+  const [preview, setPreview] = useState(currentPhoto);
   const [loading, setLoading] = useState(false);
 
-  async function upload(file) {
+  async function upload(file: File | undefined) {
+    if (!file) return;
+
     if (!file.type.startsWith("image/")) {
       alert("Image only");
       return;
@@ -20,21 +27,14 @@ export function PhotoUploader({ playerId, currentPhoto }) {
       const fileName = `${Date.now()}-${playerId}`;
       const path = `players/${playerId}/${fileName}`;
 
-      // Upload to Supabase
-      const { error } = await supabase.storage
-        .from(BUCKET)
-        .upload(path, file);
+      const { error } = await supabase.storage.from(BUCKET).upload(path, file);
 
       if (error) throw error;
 
-      // Get public URL
-      const { data } = supabase.storage
-        .from(BUCKET)
-        .getPublicUrl(path);
+      const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
       const url = data.publicUrl;
 
-      // Save to your system
       await authedPost("updatePlayerProfile", {
         playerId,
         photo: url,
@@ -43,19 +43,20 @@ export function PhotoUploader({ playerId, currentPhoto }) {
       setPreview(url);
       alert("Uploaded");
     } catch (e) {
-      alert(e.message);
+      alert(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
     <div>
-      {preview && <img src={preview} style={{ width: "100%" }} />}
+      {preview && <img src={preview} style={{ width: "100%" }} alt="Player profile" />}
 
       <input
         type="file"
-        onChange={(e) => upload(e.target.files[0])}
+        accept="image/*"
+        onChange={(e) => upload(e.target.files?.[0])}
       />
 
       {loading && <p>Uploading...</p>}
