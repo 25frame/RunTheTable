@@ -5,7 +5,7 @@ export type RTTUser = {
   playerId?: string;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_RTT_API_URL || "https://script.google.com/macros/s/AKfycbycnGdAqxQUpqLAyO9sQ1DfrSzDk94_sf0wBzCVZgDVrqVjZQ3xxIS6AZ39U07Stodd/exec";
+const API_URL = "/api/rtt";
 const TOKEN_KEY = "rtt_token";
 const USER_KEY = "rtt_user";
 
