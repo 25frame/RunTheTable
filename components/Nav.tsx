@@ -5,6 +5,7 @@ const links = [
   ["/live", "Live"],
   ["/standings", "Board"],
   ["/players", "Crew"],
+  ["/rules", "Rules"],   // ← ADD THIS
   ["/login", "Login"],
 ];
 
