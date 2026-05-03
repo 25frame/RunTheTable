@@ -86,3 +86,56 @@ function Metric({ label, value }: { label: string; value: string | number }) {
     </div>
   );
 }
+<button
+
+  onClick={() => router.push("/rules")}
+
+  className="rounded-[2rem] border border-white/10 bg-white/5 p-8 text-left text-2xl font-black uppercase"
+
+>
+
+  Rules
+
+  <span className="mt-2 block text-sm font-bold normal-case text-white/60">
+
+    Open rules page.
+
+  </span>
+
+</button>
+
+<button
+
+  onClick={() => router.push("/park")}
+
+  className="rounded-[2rem] border border-white/10 bg-white/5 p-8 text-left text-2xl font-black uppercase"
+
+>
+
+  Park QR
+
+  <span className="mt-2 block text-sm font-bold normal-case text-white/60">
+
+    Open QR landing page.
+
+  </span>
+
+</button>
+
+<button
+
+  onClick={() => router.push("/join")}
+
+  className="rounded-[2rem] border border-white/10 bg-white/5 p-8 text-left text-2xl font-black uppercase"
+
+>
+
+  Join
+
+  <span className="mt-2 block text-sm font-bold normal-case text-white/60">
+
+    Open signup page.
+
+  </span>
+
+</button>

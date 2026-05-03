@@ -1,11 +1,17 @@
 import Link from "next/link";
 
 const links = [
+
   ["/", "Home"],
+
   ["/live", "Live"],
+
   ["/standings", "Board"],
+
   ["/players", "Crew"],
-  ["/login", "Login"],
+
+  ["/rules", "Rules"],
+
 ];
 
 export function Nav() {
