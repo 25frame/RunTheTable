@@ -1,13 +1,100 @@
+import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
-import { Card } from "@/components/Card";
 import { PlayerAvatar } from "@/components/PlayerAvatar";
+import { getStatus, getTier, StatusPill } from "@/components/StatusPill";
 import { notFound } from "next/navigation";
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
 export default async function PlayerProfilePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params; const { players, matches } = await getRTTData(); const player = players.find((p)=>p.id===id); if (!player) notFound();
-  const playerMatches = matches.filter((m)=>m.playerAId===player.id||m.playerBId===player.id||m.playerA===player.name||m.playerB===player.name);
-  const liveMatch = playerMatches.find((m)=>(m.status||"").toLowerCase()==="live");
-  const winPct = Math.round((player.wins / Math.max(player.wins + player.losses, 1))*100);
-  return <main className="mx-auto min-h-screen max-w-7xl px-4 py-8 text-white md:px-5 md:py-10"><section className="grid gap-5 md:grid-cols-[1.1fr_0.9fr]"><Card className="relative overflow-hidden"><div className="absolute inset-x-0 top-0 h-1.5 bg-rtt-red"/><div className="grid gap-5 pt-3 md:grid-cols-[180px_1fr]"><div className="h-56 overflow-hidden rounded-3xl bg-black md:h-full"><PlayerAvatar player={player}/></div><div><p className="text-xs font-black uppercase tracking-[0.3em] text-rtt-red">Player Profile</p><h1 className="mt-3 text-5xl font-black italic uppercase leading-none md:text-6xl">{player.name}</h1><p className="mt-2 text-lg text-white/55">{player.handle}</p><div className="mt-4 flex flex-wrap gap-2"><span className="rounded-full border border-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.18em]">{player.skill}</span><span className="rounded-full bg-rtt-red px-3 py-1 text-xs font-black uppercase tracking-[0.18em]">Rank #{player.rank}</span></div></div></div></Card><div className="grid grid-cols-2 gap-4">{[["Wins",player.wins],["Losses",player.losses],["Win %",`${winPct}%`],["Points",player.points]].map(([label,value])=><Card key={label}><p className="text-xs font-black uppercase tracking-[0.2em] text-white/45">{label}</p><p className="mt-3 text-4xl font-black">{value}</p></Card>)}</div></section>{liveMatch && <Card className="mt-6 border-rtt-red/40 bg-rtt-red/10"><p className="text-xs font-black uppercase tracking-[0.3em] text-rtt-red">Live Now</p><div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3"><div><p className="text-xl font-black uppercase md:text-3xl">{liveMatch.playerA}</p><p className="mt-2 text-6xl font-black">{liveMatch.scoreA}</p></div><p className="text-3xl font-black text-rtt-red">VS</p><div className="text-right"><p className="text-xl font-black uppercase md:text-3xl">{liveMatch.playerB}</p><p className="mt-2 text-6xl font-black">{liveMatch.scoreB}</p></div></div></Card>}<section className="mt-6 grid gap-6 md:grid-cols-2"><Card><p className="text-xs font-black uppercase tracking-[0.3em] text-rtt-red">Metrics</p><h2 className="mt-2 text-3xl font-black italic uppercase">Ranking</h2><div className="mt-5 space-y-3"><div className="flex justify-between rounded-2xl bg-white/5 p-4"><span>Game Diff</span><b>{player.gameDiff}</b></div><div className="flex justify-between rounded-2xl bg-white/5 p-4"><span>Point Diff</span><b>{player.pointDiff}</b></div><div className="flex justify-between rounded-2xl bg-white/5 p-4"><span>Streak</span><b className="text-rtt-red">{player.streak||"Active"}</b></div></div></Card><Card><p className="text-xs font-black uppercase tracking-[0.3em] text-rtt-red">Matches</p><h2 className="mt-2 text-3xl font-black italic uppercase">Recent Log</h2><div className="mt-5 space-y-3">{playerMatches.slice(0,6).map((m)=><div key={`${m.matchId}-${m.row}`} className="rounded-2xl bg-white/5 p-4"><p className="font-black uppercase">{m.playerA} vs {m.playerB}</p><p className="text-sm text-white/55">{m.score} · Winner: {m.winner || "TBD"} · {m.status || "Scheduled"}</p></div>)}</div></Card></section></main>;
+  const { id } = await params;
+  const { players, matches } = await getRTTData();
+  const player = players.find((p) => p.id === id);
+
+  if (!player) notFound();
+
+  const playerMatches = matches.filter(
+    (m) =>
+      m.playerAId === player.id ||
+      m.playerBId === player.id ||
+      m.playerA === player.name ||
+      m.playerB === player.name
+  );
+
+  const liveMatch = playerMatches.find((m) => (m.status || "").toLowerCase() === "live");
+  const tier = getTier(player);
+  const status = getStatus(player);
+
+  return (
+    <main className="rtt-shell text-white">
+      <section className="rtt-max">
+        <div className="rtt-card overflow-hidden">
+          <div className="h-80 bg-black">
+            <PlayerAvatar player={player} />
+          </div>
+
+          <div className="p-5">
+            <p className="rtt-kicker">Competitor Profile</p>
+            <h1 className="mt-3 text-6xl font-black italic uppercase leading-none tracking-[-0.08em]">
+              {player.handle || player.name}
+            </h1>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              <StatusPill>#{player.rank}</StatusPill>
+              <StatusPill>{tier}</StatusPill>
+              <StatusPill>{status}</StatusPill>
+            </div>
+
+            <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+              <Stat label="Wins" value={player.wins} />
+              <Stat label="Losses" value={player.losses} />
+              <Stat label="Score" value={player.points} />
+            </div>
+
+            <Link href={`/players/${player.id}/edit`} className="rtt-cta mt-6 w-full">
+              Edit Profile
+            </Link>
+          </div>
+        </div>
+
+        {liveMatch && (
+          <section className="rtt-card mt-5 p-5">
+            <p className="rtt-kicker">Live Now</p>
+            <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+              <p className="text-left text-3xl font-black italic uppercase leading-none">{liveMatch.playerA}</p>
+              <p className="text-2xl font-black text-rtt-red">VS</p>
+              <p className="text-right text-3xl font-black italic uppercase leading-none">{liveMatch.playerB}</p>
+            </div>
+            <p className="mt-5 text-center text-7xl font-black">
+              {liveMatch.scoreA} — {liveMatch.scoreB}
+            </p>
+          </section>
+        )}
+
+        <section className="mt-6">
+          <p className="rtt-kicker">Battle Log</p>
+          <div className="mt-4 grid gap-3">
+            {playerMatches.slice(0, 8).map((m) => (
+              <div key={`${m.matchId}-${m.row}`} className="rtt-card p-4">
+                <p className="text-lg font-black uppercase">{m.playerA} vs {m.playerB}</p>
+                <p className="mt-1 text-sm text-white/50">
+                  {m.score} / Winner: {m.winner || "TBD"} / {m.status || "Scheduled"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-2xl bg-black/55 p-4">
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">{label}</p>
+      <p className="mt-1 text-3xl font-black">{value}</p>
+    </div>
+  );
 }

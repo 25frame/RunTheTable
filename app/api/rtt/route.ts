@@ -1,13 +1,14 @@
 const RTT_API_URL =
-  "https://script.google.com/macros/s/AKfycbzfa1L7ujOLoleBFIXZs9LlE6g2eD_UPy_8el7VYGqDdPZA7HmRf5ZFfqHL7mrqCP7o/exec";
+  process.env.NEXT_PUBLIC_RTT_API_URL ||
+  "https://script.google.com/macros/s/AKfycbycnGdAqxQUpqLAyO9sQ1DfrSzDk94_sf0wBzCVZgDVrqVjZQ3xxIS6AZ39U07Stodd/exec";
 
 export async function GET() {
-  const res = await fetch(RTT_API_URL, { cache: "no-store" });
+  const res = await fetch(RTT_API_URL, { cache: "no-store", redirect: "follow" });
   const text = await res.text();
 
   return new Response(text, {
     status: 200,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" }
   });
 }
 
@@ -17,10 +18,10 @@ export async function POST(req: Request) {
   const res = await fetch(RTT_API_URL, {
     method: "POST",
     headers: {
-      "Content-Type": "text/plain;charset=utf-8",
+      "Content-Type": "text/plain;charset=utf-8"
     },
     body,
-    redirect: "follow",
+    redirect: "follow"
   });
 
   const text = await res.text();
@@ -28,15 +29,16 @@ export async function POST(req: Request) {
   if (text.trim().startsWith("<")) {
     return Response.json({
       ok: false,
-      error: "Apps Script returned HTML instead of JSON.",
+      error:
+        "Apps Script returned HTML instead of JSON. Check Apps Script deployment: Execute as Me, Access Anyone, New version.",
       status: res.status,
       contentType: res.headers.get("content-type"),
-      preview: text.slice(0, 500),
+      preview: text.slice(0, 500)
     });
   }
 
   return new Response(text, {
     status: 200,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" }
   });
 }

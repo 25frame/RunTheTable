@@ -16,6 +16,7 @@ export function getToken() {
 
 export function getCurrentUser(): RTTUser | null {
   if (typeof window === "undefined") return null;
+
   try {
     const raw = window.localStorage.getItem(USER_KEY);
     return raw ? JSON.parse(raw) : null;
@@ -45,9 +46,12 @@ export async function login(email: string, password: string) {
     body: JSON.stringify({ action: "login", payload: { email, password } })
   });
 
-  if (!res.ok) throw new Error(`Login failed with HTTP ${res.status}`);
   const data = await res.json();
-  if (!data.ok) throw new Error(data.error || "Invalid login.");
+
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || `Login failed with HTTP ${res.status}`);
+  }
+
   setSession(data.token, data.user);
   return data.user as RTTUser;
 }
@@ -57,14 +61,18 @@ export async function authedPost<TPayload extends Record<string, unknown>>(
   payload: TPayload = {} as TPayload
 ) {
   const token = getToken();
+
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ action, token, payload })
   });
 
-  if (!res.ok) throw new Error(`API failed with HTTP ${res.status}`);
   const data = await res.json();
-  if (!data.ok) throw new Error(data.error || "Request failed.");
+
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || "Request failed.");
+  }
+
   return data;
 }
