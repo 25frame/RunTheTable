@@ -1,6 +1,6 @@
 const RTT_API_URL =
   process.env.NEXT_PUBLIC_RTT_API_URL ||
-  "https://script.google.com/macros/s/AKfycby_DGpXQYM7APGg0cte-_lxal6nYTVFxj2m48MvB_PUkGwPqaNn-3LMynW7x3WWwgfM/exec";
+  "https://script.google.com/macros/s/AKfycbycnGdAqxQUpqLAyO9sQ1DfrSzDk94_sf0wBzCVZgDVrqVjZQ3xxIS6AZ39U07Stodd/exec";
 
 export async function GET() {
   const res = await fetch(RTT_API_URL, { cache: "no-store", redirect: "follow" });

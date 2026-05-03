@@ -7,15 +7,10 @@ import type { ReactNode } from "react";
 
 const adminLinks = [
   ["/admin/dashboard", "Dashboard"],
-  ["/admin/control", "Control"],
   ["/admin/matches", "Scoring"],
-  ["/admin/create-match", "New Battle"],
-  ["/admin/create-player", "New Player"],
-  ["/admin/users", "Users"],
-  ["/admin/setup", "Setup"],
-  ["/admin/health", "Health"],
-  ["/admin/onboarding", "Training"],
-  ["/live", "Public Live"],
+  ["/admin/players", "Players"],
+  ["/admin/settings", "Settings"],
+  ["/live", "Public Live"]
 ];
 
 export function AdminShell({ children }: { children: ReactNode }) {
@@ -26,7 +21,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <header className="border-b border-white/10 bg-black/90 px-5 py-4">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="rtt-kicker">Super Admin</p>
+            <p className="rtt-kicker">Private Admin</p>
             <h1 className="text-2xl font-black italic uppercase">RTT Control Room</h1>
           </div>
 
