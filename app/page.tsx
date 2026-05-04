@@ -9,7 +9,7 @@ export default async function HomePage() {
   return (
     <main className="rtt-shell text-white">
       <section className="rtt-max">
-        <p className="rtt-kicker">NYC Street Table Tennis</p>
+        <p className="rtt-kicker">NYC Underground Table Tennis</p>
         <h1 className="rtt-title">RUN<br />THE<br />TABLE</h1>
         <p className="rtt-subtitle">Show up. Battle. Climb the board. No soft games.</p>
 
