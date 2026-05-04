@@ -121,11 +121,10 @@ export default function AdminDashboardPage() {
         />
 
       <DashboardButton
-title="Park QR"
-text="Open QR landing."
-OnClick={() => router.push("/park")}
-/>
-
+          title="Park QR"
+          text="Open QR landing."
+          OnClick={() => router.push("/park")}
+          />
         <DashboardButton
           title="Join"
           text="Open signup page."
