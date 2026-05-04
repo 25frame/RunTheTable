@@ -3,7 +3,7 @@ const RTT_API_URL = process.env.NEXT_PUBLIC_RTT_API_URL!;
 let cachedData: string | null = null;
 let cachedAt = 0;
 
-const CACHE_MS = 10_000;
+const CACHE_MS = 120_000; // 120 seconds
 
 export async function GET() {
   const now = Date.now();
@@ -12,7 +12,7 @@ export async function GET() {
     return new Response(cachedData, {
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": "public, s-maxage=10, stale-while-revalidate=30",
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
       },
     });
   }
@@ -30,7 +30,7 @@ export async function GET() {
   return new Response(text, {
     headers: {
       "Content-Type": "application/json",
-      "Cache-Control": "public, s-maxage=10, stale-while-revalidate=30",
+      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
     },
   });
 }
@@ -49,18 +49,9 @@ export async function POST(req: Request) {
 
   const text = await res.text();
 
-  // Clear cache after admin/player writes.
+  // 🔥 Clear cache on any write
   cachedData = null;
   cachedAt = 0;
-
-  if (text.trim().startsWith("<")) {
-    return Response.json({
-      ok: false,
-      error: "Apps Script returned HTML instead of JSON.",
-      status: res.status,
-      preview: text.slice(0, 500),
-    });
-  }
 
   return new Response(text, {
     headers: {

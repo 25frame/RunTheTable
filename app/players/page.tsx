@@ -1,3 +1,4 @@
+"use client";
 import { getRTTData } from "@/lib/googleData";
 import { CompetitorCard } from "@/components/CompetitorCard";
 

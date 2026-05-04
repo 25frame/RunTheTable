@@ -1,3 +1,4 @@
+"use client";
 import { LiveScoreboard } from "@/components/LiveScoreboard";
 
 export const dynamic = "force-dynamic";
