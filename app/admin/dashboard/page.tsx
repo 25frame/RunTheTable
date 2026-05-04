@@ -123,7 +123,7 @@ export default function AdminDashboardPage() {
       <DashboardButton
           title="Park QR"
           text="Open QR landing."
-          OnClick={() => router.push("/park")}
+          onClick={() => router.push("/park")}
           />
         <DashboardButton
           title="Join"
