@@ -17,7 +17,7 @@ export function LiveScoreboard() {
 
   useEffect(() => {
     refresh();
-    const timer = window.setInterval(refresh, 3000);
+    const timer = window.setInterval(refresh, 8000);
     return () => window.clearInterval(timer);
   }, []);
 
