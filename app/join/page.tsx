@@ -1,19 +1,45 @@
-import Link from "next/link";
-import { getRTTData } from "@/lib/googleData";
+"use client";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+import { useState } from "react";
 
-const FALLBACK_FORM_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform?usp=header";
+export default function JoinPage() {
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function JoinPage() {
-  const data = await getRTTData();
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-  const formUrl =
-    data?.formUrl && data.formUrl.startsWith("http")
-      ? data.formUrl
-      : FALLBACK_FORM_URL;
+    const form = new FormData(e.currentTarget);
+
+    const payload = {
+      name: String(form.get("name") || "").trim(),
+      email: String(form.get("email") || "").trim(),
+      instagram: String(form.get("instagram") || "").trim(),
+      skill: String(form.get("skill") || "Beginner"),
+      notes: String(form.get("notes") || "").trim(),
+    };
+
+    try {
+      const res = await fetch("/api/rtt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "join", payload }),
+      });
+
+      const data = await res.json();
+
+      if (!data.ok) throw new Error(data.error || "Join failed");
+
+      setDone(true);
+    } catch (err: any) {
+      setError(err.message || "Error");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <main className="rtt-shell text-white">
@@ -26,31 +52,34 @@ export default async function JoinPage() {
           The Board
         </h1>
 
-        <p className="rtt-subtitle">
-          Sign up, show up, play tracked battles, and climb the board.
-        </p>
+        {!done ? (
+          <form onSubmit={submit} className="mt-8 grid gap-4">
+            <input name="name" placeholder="Name" required className="rtt-input" />
+            <input name="email" placeholder="Email" required className="rtt-input" />
+            <input name="instagram" placeholder="@handle (optional)" className="rtt-input" />
 
-        <div className="mt-8 rounded-[2rem] border border-white/10 bg-white/5 p-6">
-          <p className="text-xl font-black uppercase">First step: register.</p>
+            <select name="skill" className="rtt-input">
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+            </select>
 
-          <p className="mt-2 text-sm leading-6 text-white/55">
-            After you register, admin can place you into a match and your record
-            will appear on the board.
-          </p>
+            <textarea name="notes" placeholder="Notes (optional)" className="rtt-input" />
 
-          <a
-            href={formUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rtt-cta mt-6 w-full"
-          >
-            Open Registration
-          </a>
+            <button disabled={loading} className="rtt-cta">
+              {loading ? "Joining..." : "Join"}
+            </button>
 
-          <Link href="/rules" className="rtt-secondary mt-3 w-full">
-            See Rules First
-          </Link>
-        </div>
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+          </form>
+        ) : (
+          <div className="mt-8 rounded-[2rem] border border-green-400/30 bg-green-400/10 p-6">
+            <h2 className="text-2xl font-black uppercase">You're In</h2>
+            <p className="mt-2 text-white/70">
+              You’ve been added to the board. Wait for admin to assign your first match.
+            </p>
+          </div>
+        )}
       </section>
     </main>
   );
