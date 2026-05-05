@@ -1,11 +1,19 @@
+import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const FALLBACK_FORM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform?usp=header";
+
 export default async function JoinPage() {
   const data = await getRTTData();
-  const formUrl = data?.formUrl || "#";
+
+  const formUrl =
+    data?.formUrl && data.formUrl.startsWith("http")
+      ? data.formUrl
+      : FALLBACK_FORM_URL;
 
   return (
     <main className="rtt-shell text-white">
@@ -23,13 +31,11 @@ export default async function JoinPage() {
         </p>
 
         <div className="mt-8 rounded-[2rem] border border-white/10 bg-white/5 p-6">
-          <p className="text-xl font-black uppercase">
-            First step: register.
-          </p>
+          <p className="text-xl font-black uppercase">First step: register.</p>
 
           <p className="mt-2 text-sm leading-6 text-white/55">
-            After you register, admin can place you into a match and your
-            record will appear on the board.
+            After you register, admin can place you into a match and your record
+            will appear on the board.
           </p>
 
           <a
@@ -40,6 +46,10 @@ export default async function JoinPage() {
           >
             Open Registration
           </a>
+
+          <Link href="/rules" className="rtt-secondary mt-3 w-full">
+            See Rules First
+          </Link>
         </div>
       </section>
     </main>
