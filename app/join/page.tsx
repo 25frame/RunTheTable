@@ -3,104 +3,174 @@
 import { useState } from "react";
 
 export default function JoinPage() {
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-  const [error, setError] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    instagram: "",
+    skill: "Beginner",
+    notes: "",
+    photo: ""
+  });
 
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  function update(field: string, value: string) {
+    setForm((f) => ({ ...f, [field]: value }));
+  }
+
+  // 🔥 (OPTIONAL) Supabase upload placeholder
+  async function handlePhotoUpload(file: File) {
+    try {
+      // 👉 replace with your real Supabase upload later
+      // for now just fake preview
+      const url = URL.createObjectURL(file);
+      update("photo", url);
+    } catch (e) {
+      console.error(e);
+      setError("Photo upload failed");
+    }
+  }
+
+  async function submit() {
     setLoading(true);
     setError("");
 
-    const form = new FormData(e.currentTarget);
-
     try {
-      // 🔥 Upload photo to Supabase (or skip if empty)
-      let photoUrl = "";
-
-      const file = form.get("photo") as File;
-
-      if (file && file.size > 0) {
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: file,
-        });
-
-        const uploadData = await uploadRes.json();
-        photoUrl = uploadData.url;
-      }
-
-      const payload = {
-        name: String(form.get("name") || "").trim(),
-        email: String(form.get("email") || "").trim(),
-        phone: String(form.get("phone") || "").trim(),
-        instagram: String(form.get("instagram") || "").trim(),
-        skill: String(form.get("skill") || "Beginner"),
-        notes: String(form.get("notes") || "").trim(),
-        photo: photoUrl,
-      };
-
       const res = await fetch("/api/rtt", {
         method: "POST",
         headers: {
-          "Content-Type": "text/plain;charset=utf-8",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           action: "join",
-          payload,
-        }),
+          payload: form
+        })
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      console.log("JOIN RAW RESPONSE:", text);
 
-      if (!data.ok) throw new Error(data.error);
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error("Server returned non-JSON: " + text.slice(0, 200));
+      }
+
+      if (!data.ok) {
+        throw new Error(data.error || "Join failed");
+      }
 
       setDone(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Join failed");
+      console.error("JOIN ERROR:", err);
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
   }
 
   if (done) {
-    return <div className="p-10 text-white text-3xl">You’re in.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        <div className="text-center">
+          <h1 className="text-4xl font-black uppercase">You’re In</h1>
+          <p className="mt-3 text-white/60">See you at the table.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <main className="rtt-shell text-white">
-      <section className="rtt-max">
-        <h1 className="rtt-title">Join RTT</h1>
+    <div className="min-h-screen p-6 text-white max-w-2xl mx-auto">
+      <h1 className="text-5xl font-black italic uppercase">Join</h1>
 
-        <form onSubmit={submit} className="mt-8 grid gap-4">
+      <div className="mt-8 grid gap-4">
 
-          <input name="name" required placeholder="Name" className="rtt-input" />
-          <input name="email" required type="email" placeholder="Email" className="rtt-input" />
+        <input
+          placeholder="Name"
+          value={form.name}
+          onChange={(e) => update("name", e.target.value)}
+          className="rtt-input"
+        />
 
-          {/* ✅ NEW */}
-          <input name="phone" placeholder="Phone" className="rtt-input" />
+        <input
+          placeholder="Email"
+          value={form.email}
+          onChange={(e) => update("email", e.target.value)}
+          className="rtt-input"
+        />
 
-          <input name="instagram" placeholder="@handle" className="rtt-input" />
+        <input
+          placeholder="Phone"
+          value={form.phone}
+          onChange={(e) => update("phone", e.target.value)}
+          className="rtt-input"
+        />
 
-          <select name="skill" className="rtt-input">
-            <option>Beginner</option>
-            <option>Intermediate</option>
-            <option>Advanced</option>
-          </select>
+        <input
+          placeholder="Instagram"
+          value={form.instagram}
+          onChange={(e) => update("instagram", e.target.value)}
+          className="rtt-input"
+        />
 
-          {/* ✅ PHOTO UPLOAD */}
-          <input type="file" name="photo" accept="image/*" className="rtt-input" />
+        <select
+          value={form.skill}
+          onChange={(e) => update("skill", e.target.value)}
+          className="rtt-input"
+        >
+          <option>Beginner</option>
+          <option>Rookie</option>
+          <option>Challenger</option>
+          <option>Contender</option>
+          <option>Killer</option>
+        </select>
 
-          <textarea name="notes" placeholder="Notes" className="rtt-input" />
+        <textarea
+          placeholder="Notes"
+          value={form.notes}
+          onChange={(e) => update("notes", e.target.value)}
+          className="rtt-input"
+        />
 
-          {error && <p className="text-red-400">{error}</p>}
+        {/* PHOTO */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            if (e.target.files?.[0]) {
+              handlePhotoUpload(e.target.files[0]);
+            }
+          }}
+          className="rtt-input"
+        />
 
-          <button className="rtt-cta">
-            {loading ? "Joining..." : "Join"}
-          </button>
+        {form.photo && (
+          <img
+            src={form.photo}
+            alt="preview"
+            className="w-32 h-32 object-cover rounded-xl border border-white/10"
+          />
+        )}
 
-        </form>
-      </section>
-    </main>
+        {error && (
+          <div className="text-red-400 text-sm font-bold">
+            {error}
+          </div>
+        )}
+
+        <button
+          onClick={submit}
+          disabled={loading || !form.name || !form.email}
+          className="rtt-cta disabled:opacity-50"
+        >
+          {loading ? "Joining..." : "Join"}
+        </button>
+      </div>
+    </div>
   );
 }
