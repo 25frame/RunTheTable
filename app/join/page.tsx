@@ -61,7 +61,7 @@ export default function JoinPage() {
       }
 
       if (!data.ok) {
-        throw new Error(data.error || "Join failed");
+throw new Error(data.error || JSON.stringify(data));
       }
 
       setDone(true);
