@@ -23,7 +23,6 @@ export async function GET() {
   });
 
   const text = await res.text();
-
   cachedData = text;
   cachedAt = now;
 
