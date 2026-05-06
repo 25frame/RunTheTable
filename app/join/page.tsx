@@ -67,10 +67,20 @@ export default function JoinPage() {
         }),
       });
 
-      const text = await res.text();
-      console.log("JOIN RAW RESPONSE:", text);
+     const text = await res.text();
+console.log("JOIN STATUS:", res.status);
+console.log("JOIN RAW RESPONSE:", text);
 
-      const data = JSON.parse(text);
+if (!text || !text.trim()) {
+  throw new Error(`Empty response from /api/rtt. HTTP status: ${res.status}`);
+}
+
+let data;
+try {
+  data = JSON.parse(text);
+} catch {
+  throw new Error(`Non-JSON response from /api/rtt: ${text.slice(0, 300)}`);
+}
 
       if (!data.ok) {
         throw new Error(data.error || JSON.stringify(data));

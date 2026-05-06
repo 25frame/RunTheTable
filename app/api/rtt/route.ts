@@ -1,4 +1,10 @@
 const RTT_API_URL = process.env.NEXT_PUBLIC_RTT_API_URL!;
+if (!RTT_API_URL) {
+  return Response.json({
+    ok: false,
+    error: "Missing NEXT_PUBLIC_RTT_API_URL",
+  });
+}
 
 let cachedData: string | null = null;
 let cachedAt = 0;
