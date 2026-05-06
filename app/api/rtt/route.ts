@@ -1,10 +1,4 @@
-const RTT_API_URL = process.env.NEXT_PUBLIC_RTT_API_URL!;
-if (!RTT_API_URL) {
-  return Response.json({
-    ok: false,
-    error: "Missing NEXT_PUBLIC_RTT_API_URL",
-  });
-}
+const RTT_API_URL = process.env.NEXT_PUBLIC_RTT_API_URL;
 
 let cachedData: string | null = null;
 let cachedAt = 0;
@@ -12,6 +6,13 @@ let cachedAt = 0;
 const CACHE_MS = 120_000;
 
 export async function GET() {
+  if (!RTT_API_URL) {
+    return Response.json({
+      ok: false,
+      error: "Missing NEXT_PUBLIC_RTT_API_URL",
+    });
+  }
+
   const now = Date.now();
 
   if (cachedData && now - cachedAt < CACHE_MS) {
@@ -29,6 +30,7 @@ export async function GET() {
   });
 
   const text = await res.text();
+
   cachedData = text;
   cachedAt = now;
 
@@ -41,6 +43,13 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  if (!RTT_API_URL) {
+    return Response.json({
+      ok: false,
+      error: "Missing NEXT_PUBLIC_RTT_API_URL",
+    });
+  }
+
   const body = await req.text();
 
   const res = await fetch(RTT_API_URL, {
@@ -56,6 +65,13 @@ export async function POST(req: Request) {
 
   cachedData = null;
   cachedAt = 0;
+
+  if (!text || !text.trim()) {
+    return Response.json({
+      ok: false,
+      error: `Empty response from Apps Script. HTTP status: ${res.status}`,
+    });
+  }
 
   return new Response(text, {
     headers: {
