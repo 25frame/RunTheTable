@@ -1,5 +1,6 @@
 import { authedPost } from "@/lib/auth";
-import type { RTTData, RTTUser } from "@/lib/googleData";
+import type { RTTUser } from "@/lib/auth";
+import type { RTTData } from "@/lib/googleData";
 
 export type AdminHealthTab = {
   name: string;
@@ -126,28 +127,28 @@ export async function recalcStandings(): Promise<AdminActionResult> {
 export async function createPlayer(
   payload: CreatePlayerPayload
 ): Promise<AdminActionResult & { playerId?: string }> {
-  return authedPost<CreatePlayerPayload, AdminActionResult & { playerId?: string }>(
-    "createPlayer",
-    payload
-  );
+  return authedPost<
+    CreatePlayerPayload,
+    AdminActionResult & { playerId?: string }
+  >("createPlayer", payload);
 }
 
 export async function updatePlayerAdmin(
   payload: UpdatePlayerPayload
 ): Promise<AdminActionResult & { playerId?: string }> {
-  return authedPost<UpdatePlayerPayload, AdminActionResult & { playerId?: string }>(
-    "updatePlayerProfile",
-    payload
-  );
+  return authedPost<
+    UpdatePlayerPayload,
+    AdminActionResult & { playerId?: string }
+  >("updatePlayerProfile", payload);
 }
 
 export async function createUser(
   payload: CreateUserPayload
 ): Promise<AdminActionResult & { userId?: string }> {
-  return authedPost<CreateUserPayload, AdminActionResult & { userId?: string }>(
-    "createUser",
-    payload
-  );
+  return authedPost<
+    CreateUserPayload,
+    AdminActionResult & { userId?: string }
+  >("createUser", payload);
 }
 
 export async function listUsers(): Promise<ListUsersResult> {
@@ -167,19 +168,19 @@ export async function setUserStatus(payload: {
 export async function deleteUser(payload: {
   userId: string;
 }): Promise<AdminActionResult & { userId?: string }> {
-  return authedPost<{ userId: string }, AdminActionResult & { userId?: string }>(
-    "deleteUser",
-    payload
-  );
+  return authedPost<
+    { userId: string },
+    AdminActionResult & { userId?: string }
+  >("deleteUser", payload);
 }
 
 export async function createMatch(
   payload: CreateMatchPayload
 ): Promise<AdminActionResult & { matchId?: string }> {
-  return authedPost<CreateMatchPayload, AdminActionResult & { matchId?: string }>(
-    "createMatch",
-    payload
-  );
+  return authedPost<
+    CreateMatchPayload,
+    AdminActionResult & { matchId?: string }
+  >("createMatch", payload);
 }
 
 export async function updateLiveScore(
@@ -193,19 +194,26 @@ export async function updateLiveScore(
 
 export async function saveLiveMatch(
   payload: SaveLiveMatchPayload
-): Promise<AdminActionResult & { winner?: string; score?: string }> {
+): Promise<
+  AdminActionResult & {
+    winner?: string;
+    score?: string;
+  }
+> {
   return authedPost<
     SaveLiveMatchPayload,
-    AdminActionResult & { winner?: string; score?: string }
+    AdminActionResult & {
+      winner?: string;
+      score?: string;
+    }
   >("saveLiveMatch", payload);
 }
 
 /**
- * These functions are only safe to use after the Apps Script backend exposes:
- * - updateSetup
- * - updatePayoutConfig
+ * Reserved helper.
  *
- * Your current Apps Script does not include those actions yet.
+ * Your current Apps Script backend does not yet expose "updateSetup".
+ * Do not call this from active UI until the Apps Script doPost() supports it.
  */
 export async function updateSetup(payload: {
   activeEventId?: string;
@@ -222,6 +230,12 @@ export async function updateSetup(payload: {
   >("updateSetup", payload);
 }
 
+/**
+ * Reserved helper.
+ *
+ * Your current Apps Script backend does not yet expose "updatePayoutConfig".
+ * Do not call this from active UI until the Apps Script doPost() supports it.
+ */
 export async function updatePayoutConfig(payload: {
   eventId?: string;
   paidPlayers?: number;
