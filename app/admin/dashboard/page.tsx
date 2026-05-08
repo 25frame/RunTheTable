@@ -120,6 +120,12 @@ export default function AdminDashboardPage() {
           text="Review roster."
           onClick={() => router.push("/admin/players")}
         />
+<DashboardButton
+  title="QR Check-In"
+  text="Show join QR."
+  primary
+  onClick={() => router.push("/admin/qr")}
+/>
 
         <DashboardButton
           title="Create Player"

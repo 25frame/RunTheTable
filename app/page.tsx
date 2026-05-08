@@ -18,9 +18,10 @@ export default async function HomePage() {
           subtitle="Scan in. Join the next battle. Get on the board."
         />
 
+        {/* PRIMARY WORKFLOW */}
         <section className="grid gap-3">
-          <Link href="/join" className="rtt-cta">
-            Join Next Battle
+          <Link href="/park" className="rtt-cta">
+            Scan In / Join
           </Link>
 
           <div className="grid gap-3 md:grid-cols-2">
@@ -34,6 +35,14 @@ export default async function HomePage() {
           </div>
         </section>
 
+        {/* QUICK EXPLAINER */}
+        <section className="rtt-section grid grid-cols-3 gap-2">
+          <MiniStep number="01" label="Scan" />
+          <MiniStep number="02" label="Play" />
+          <MiniStep number="03" label="Climb" />
+        </section>
+
+        {/* TOP BOARD */}
         <section className="rtt-section">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
@@ -88,8 +97,39 @@ export default async function HomePage() {
             )}
           </div>
         </section>
+
+        {/* SECONDARY JOIN REMINDER */}
+        <section className="rtt-section rtt-mobile-card">
+          <p className="rtt-mini-kicker">At The Table?</p>
+
+          <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.06em]">
+            Get in the next battle.
+          </h2>
+
+          <p className="mt-3 text-sm font-bold leading-6 text-white/50">
+            Scan the QR code at the table or join directly from here.
+          </p>
+
+          <Link href="/join" className="rtt-cta mt-5 w-full">
+            Join Next Battle
+          </Link>
+        </section>
       </section>
     </main>
+  );
+}
+
+function MiniStep({ number, label }: { number: string; label: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-3 text-center">
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-rtt-red">
+        {number}
+      </p>
+
+      <p className="mt-1 text-sm font-black uppercase tracking-[-0.03em] text-white/70">
+        {label}
+      </p>
+    </div>
   );
 }
 
