@@ -18,7 +18,6 @@ export default async function HomePage() {
           subtitle="Scan in. Join the next battle. Get on the board."
         />
 
-        {/* CTA */}
         <section className="grid gap-3">
           <Link href="/join" className="rtt-cta">
             Join Next Battle
@@ -35,7 +34,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* TOP BOARD */}
         <section className="rtt-section">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
