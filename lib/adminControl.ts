@@ -1,6 +1,6 @@
 import { authedPost } from "@/lib/auth";
 import type { RTTUser } from "@/lib/auth";
-import type { RTTConfig, RTTData } from "@/lib/googleData";
+import type { RTTConfig, RTTData, RTTPlace } from "@/lib/googleData";
 
 export type AdminHealthTab = {
   name: string;
@@ -21,7 +21,9 @@ export type AdminHealth = {
     matchesSheetRows: number;
     registrationsSheetRows: number;
     siteConfigRows?: number;
+    placesRows?: number;
     publicPlayersReturned: number;
+    publicPlacesReturned?: number;
   };
   error?: string;
   message?: string;
@@ -105,6 +107,42 @@ export type SiteConfigUpdatePayload = {
 
 export type SiteConfigUpdateResult = AdminActionResult & {
   config?: RTTConfig;
+};
+
+export type CreatePlacePayload = {
+  name: string;
+  borough?: string;
+  neighborhood?: string;
+  location?: string;
+  indoorOutdoor?: string;
+  tableCount?: number;
+  equipmentAvailable?: string;
+  cost?: string;
+  hoursNotes?: string;
+  sourceUrl?: string;
+  status?: string;
+  featured?: boolean;
+};
+
+export type UpdatePlacePayload = {
+  placeId: string;
+  name?: string;
+  borough?: string;
+  neighborhood?: string;
+  location?: string;
+  indoorOutdoor?: string;
+  tableCount?: number;
+  equipmentAvailable?: string;
+  cost?: string;
+  hoursNotes?: string;
+  sourceUrl?: string;
+  status?: string;
+  featured?: boolean;
+};
+
+export type PlaceActionResult = AdminActionResult & {
+  placeId?: string;
+  places?: RTTPlace[];
 };
 
 export async function adminHealthCheck(): Promise<AdminHealth> {
@@ -225,6 +263,33 @@ export async function saveLiveMatch(
       score?: string;
     }
   >("saveLiveMatch", payload);
+}
+
+export async function createPlace(
+  payload: CreatePlacePayload
+): Promise<PlaceActionResult> {
+  return authedPost<CreatePlacePayload, PlaceActionResult>(
+    "createPlace",
+    payload
+  );
+}
+
+export async function updatePlace(
+  payload: UpdatePlacePayload
+): Promise<PlaceActionResult> {
+  return authedPost<UpdatePlacePayload, PlaceActionResult>(
+    "updatePlace",
+    payload
+  );
+}
+
+export async function deletePlace(payload: {
+  placeId: string;
+}): Promise<PlaceActionResult> {
+  return authedPost<{ placeId: string }, PlaceActionResult>(
+    "deletePlace",
+    payload
+  );
 }
 
 /**

@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 const adminLinks = [
   ["/admin/dashboard", "Dashboard"],
   ["/admin/qr", "QR"],
+  ["/admin/places", "Places"],
   ["/admin/config", "Config"],
   ["/admin/control", "Control"],
   ["/admin/matches", "Scoring"],

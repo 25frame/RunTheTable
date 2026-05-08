@@ -57,6 +57,24 @@ export type RTTPayout = {
   thirdPlacePayout: number;
 };
 
+export type RTTPlace = {
+  id: string;
+  name: string;
+  borough: string;
+  neighborhood: string;
+  location: string;
+  indoorOutdoor: string;
+  tableCount: number;
+  equipmentAvailable: string;
+  cost: string;
+  hoursNotes: string;
+  sourceUrl: string;
+  status: string;
+  featured: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type RTTConfig = Record<string, string>;
 
 export type RTTData = {
@@ -67,6 +85,7 @@ export type RTTData = {
   matches: RTTMatch[];
   weeklyResults: RTTWeeklyResult[];
   payout: RTTPayout | null;
+  places: RTTPlace[];
   config: RTTConfig;
   debug?: unknown;
   cache?: unknown;
@@ -93,6 +112,17 @@ type RawRTTWeeklyResult = Partial<RTTWeeklyResult>;
 
 type RawRTTPayout = Partial<RTTPayout>;
 
+type RawRTTPlace = Partial<RTTPlace> & {
+  placeId?: string;
+  address?: string;
+  addressLocation?: string;
+  type?: string;
+  tables?: number | string;
+  notes?: string;
+  source?: string;
+  url?: string;
+};
+
 type RawRTTData = {
   ok?: boolean;
   success?: boolean;
@@ -104,6 +134,7 @@ type RawRTTData = {
   matches?: RawRTTMatch[];
   weeklyResults?: RawRTTWeeklyResult[];
   payout?: RawRTTPayout | null;
+  places?: RawRTTPlace[];
   config?: unknown;
   data?: {
     players?: RawRTTPlayer[];
@@ -111,6 +142,7 @@ type RawRTTData = {
     matches?: RawRTTMatch[];
     weeklyResults?: RawRTTWeeklyResult[];
     payout?: RawRTTPayout | null;
+    places?: RawRTTPlace[];
     config?: unknown;
     formUrl?: string;
     updatedAt?: string;
@@ -175,6 +207,8 @@ export async function getRTTData(): Promise<RTTData> {
 
     const rawPayout = raw.payout || raw.data?.payout || null;
 
+    const rawPlaces = raw.places || raw.data?.places || [];
+
     const rawConfig = raw.config || raw.data?.config || {};
 
     return {
@@ -189,6 +223,7 @@ export async function getRTTData(): Promise<RTTData> {
       matches: normalizeMatches(rawMatches),
       weeklyResults: normalizeWeeklyResults(rawWeeklyResults),
       payout: normalizePayout(rawPayout),
+      places: normalizePlaces(rawPlaces),
       config: normalizeConfig(rawConfig),
       debug: raw.debug,
       cache: raw.cache,
@@ -206,6 +241,7 @@ export async function getRTTData(): Promise<RTTData> {
       matches: [],
       weeklyResults: [],
       payout: null,
+      places: [],
       config: {},
       error: error instanceof Error ? error.message : "Unknown RTT data error.",
     };
@@ -214,27 +250,45 @@ export async function getRTTData(): Promise<RTTData> {
 
 function getRTTApiUrl(): string {
   /*
-   * Browser/client calls should use relative API route.
+   * Browser/client calls should use the local Next.js API route.
    */
   if (typeof window !== "undefined") {
     return "/api/rtt";
   }
 
   /*
-   * Server-side Vercel builds/rendering need an absolute URL.
-   * Do NOT put "RTT_INTERNAL_API_URL=https://..." inside code.
-   * It must be an environment variable value only.
+   * Server-side production URL.
+   * Use this if explicitly provided.
    */
   if (process.env.RTT_INTERNAL_API_URL) {
     return process.env.RTT_INTERNAL_API_URL;
   }
 
+  /*
+   * Optional public site URL, recommended for stable production.
+   * Example:
+   * NEXT_PUBLIC_SITE_URL=https://run-the-table.vercel.app
+   */
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return `${process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")}/api/rtt`;
+  }
+
+  /*
+   * Vercel production domain if available.
+   */
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}/api/rtt`;
+  }
+
+  /*
+   * Vercel deployment URL fallback.
+   */
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}/api/rtt`;
   }
 
   /*
-   * Local dev server-side fallback.
+   * Local development fallback.
    */
   return "http://localhost:3000/api/rtt";
 }
@@ -333,6 +387,58 @@ function normalizePayout(payout: RawRTTPayout | null): RTTPayout | null {
     secondPlacePayout: toNumber(payout.secondPlacePayout, 0),
     thirdPlacePayout: toNumber(payout.thirdPlacePayout, 0),
   };
+}
+
+function normalizePlaces(places: RawRTTPlace[]): RTTPlace[] {
+  return places
+    .map((place, index): RTTPlace => {
+      const id =
+        clean(place.id) ||
+        clean(place.placeId) ||
+        `PLC-${String(index + 1).padStart(3, "0")}`;
+
+      const name = clean(place.name) || "Unnamed Place";
+
+      return {
+        id,
+        name,
+        borough: clean(place.borough),
+        neighborhood: clean(place.neighborhood),
+        location:
+          clean(place.location) ||
+          clean(place.addressLocation) ||
+          clean(place.address),
+        indoorOutdoor:
+          clean(place.indoorOutdoor) ||
+          clean(place.type) ||
+          "Unknown",
+        tableCount: toNumber(place.tableCount ?? place.tables, 0),
+        equipmentAvailable: clean(place.equipmentAvailable),
+        cost: clean(place.cost) || "Free",
+        hoursNotes: clean(place.hoursNotes) || clean(place.notes),
+        sourceUrl:
+          clean(place.sourceUrl) ||
+          clean(place.source) ||
+          clean(place.url),
+        status: clean(place.status) || "Active",
+        featured: toBoolean(place.featured),
+        createdAt: clean(place.createdAt),
+        updatedAt: clean(place.updatedAt),
+      };
+    })
+    .filter((place) => {
+      const status = place.status.toLowerCase();
+      return Boolean(
+        place.id &&
+          place.name &&
+          status !== "inactive" &&
+          status !== "deleted"
+      );
+    })
+    .sort((a, b) => {
+      if (a.featured !== b.featured) return a.featured ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
 }
 
 function normalizeConfig(config: unknown): RTTConfig {
