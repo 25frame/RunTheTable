@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TopPlayerBanner } from "@/components/TopPlayerBanner";
 import { PlayerIdentityCard } from "@/components/PlayerIdentityCard";
 import { ViralCTA } from "@/components/ViralCTA";
+import type { RTTPlayer, RTTMatch } from "@/lib/googleData";
 
 const RTT_API_URL =
   "https://script.google.com/macros/s/AKfycbzPEtTPBALXh_2eb1PaUeXI8DNeT74YW4g05ldRzH049LPAXKAa60oUrz1-pD7hkgZ3/exec";
@@ -9,60 +10,41 @@ const RTT_API_URL =
 const RTT_FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform";
 
-type RTTPlayer = {
-  id: string;
-  rank?: number;
-  name: string;
+type RawRTTPlayer = Partial<RTTPlayer> & {
+  playerId?: string;
   displayName?: string;
   fullName?: string;
-  skill?: string;
-  wins?: number;
-  losses?: number;
-  points?: number;
-  pointDiff?: number;
-  gameDiff?: number;
-  streak?: string;
-  handle?: string;
+  playerName?: string;
+  skillLevel?: string;
   instagram?: string;
-  photo?: string;
+  handle?: string;
 };
 
-type RTTMatch = {
-  row?: number;
-  eventId?: string;
-  matchId?: string;
-  type?: string;
-  table?: string;
-  playerAId?: string;
-  playerA?: string;
-  playerBId?: string;
-  playerB?: string;
-  scoreA?: number;
-  scoreB?: number;
-  winnerId?: string;
-  winner?: string;
-  verified?: boolean;
-  status?: string;
-  score?: string;
-};
+type RawRTTMatch = Partial<RTTMatch>;
 
 type RTTApiResponse = {
   ok?: boolean;
   success?: boolean;
-  players?: RTTPlayer[];
-  matches?: RTTMatch[];
+  players?: RawRTTPlayer[];
+  matches?: RawRTTMatch[];
   formUrl?: string;
   data?: {
-    players?: RTTPlayer[];
-    matches?: RTTMatch[];
+    players?: RawRTTPlayer[];
+    matches?: RawRTTMatch[];
     formUrl?: string;
   };
-  livePlayers?: RTTPlayer[];
+  livePlayers?: RawRTTPlayer[];
   error?: string;
   debug?: unknown;
 };
 
-async function getRTTDataDirect() {
+async function getRTTDataDirect(): Promise<{
+  players: RTTPlayer[];
+  matches: RTTMatch[];
+  formUrl: string;
+  error: string;
+  debug: unknown;
+}> {
   try {
     const response = await fetch(`${RTT_API_URL}?ts=${Date.now()}`, {
       cache: "no-store",
@@ -74,13 +56,13 @@ async function getRTTDataDirect() {
     let data: RTTApiResponse;
 
     try {
-      data = JSON.parse(text);
+      data = JSON.parse(text) as RTTApiResponse;
     } catch {
       console.error("RTT API did not return JSON:", text);
 
       return {
-        players: [] as RTTPlayer[],
-        matches: [] as RTTMatch[],
+        players: [],
+        matches: [],
         formUrl: RTT_FORM_URL,
         error: "RTT API did not return JSON.",
         debug: text,
@@ -91,28 +73,28 @@ async function getRTTDataDirect() {
       console.error("RTT API error:", data.error, data);
 
       return {
-        players: [] as RTTPlayer[],
-        matches: [] as RTTMatch[],
+        players: [],
+        matches: [],
         formUrl: data.formUrl || data.data?.formUrl || RTT_FORM_URL,
         error: data.error || "RTT API returned an error.",
         debug: data,
       };
     }
 
-    const players =
+    const rawPlayers =
       data.players ||
       data.data?.players ||
       data.livePlayers ||
       [];
 
-    const matches =
+    const rawMatches =
       data.matches ||
       data.data?.matches ||
       [];
 
     return {
-      players: normalizePlayers(players),
-      matches: normalizeMatches(matches),
+      players: normalizePlayers(rawPlayers),
+      matches: normalizeMatches(rawMatches),
       formUrl: data.formUrl || data.data?.formUrl || RTT_FORM_URL,
       error: "",
       debug: data.debug || data,
@@ -121,21 +103,20 @@ async function getRTTDataDirect() {
     console.error("RTT fetch failed:", error);
 
     return {
-      players: [] as RTTPlayer[],
-      matches: [] as RTTMatch[],
+      players: [],
+      matches: [],
       formUrl: RTT_FORM_URL,
       error: error instanceof Error ? error.message : "Unknown RTT fetch error.",
-      debug: error,
+      debug: error instanceof Error ? error.message : error,
     };
   }
 }
 
-function normalizePlayers(players: RTTPlayer[]) {
+function normalizePlayers(players: RawRTTPlayer[]): RTTPlayer[] {
   return players
     .map((player, index) => {
       const id =
         player.id ||
-        // @ts-expect-error Defensive mapping for alternate API shapes
         player.playerId ||
         `player-${index + 1}`;
 
@@ -143,16 +124,15 @@ function normalizePlayers(players: RTTPlayer[]) {
         player.name ||
         player.displayName ||
         player.fullName ||
-        // @ts-expect-error Defensive mapping for alternate API shapes
         player.playerName ||
         "Unnamed Player";
 
-      return {
+      const normalized = {
         ...player,
         id,
         rank: Number(player.rank || index + 1),
         name,
-        skill: player.skill || "Unranked",
+        skill: player.skill || player.skillLevel || "Unranked",
         wins: Number(player.wins || 0),
         losses: Number(player.losses || 0),
         points: Number(player.points || 0),
@@ -160,19 +140,25 @@ function normalizePlayers(players: RTTPlayer[]) {
         gameDiff: Number(player.gameDiff || player.pointDiff || 0),
         handle: player.handle || player.instagram || "",
         photo: player.photo || "",
-      };
+      } as RTTPlayer;
+
+      return normalized;
     })
-    .filter((player) => player.id && player.name);
+    .filter((player) => Boolean(player.id && player.name));
 }
 
-function normalizeMatches(matches: RTTMatch[]) {
-  return matches.map((match) => ({
-    ...match,
-    status: match.status || (match.verified ? "Final" : "Scheduled"),
-    score:
-      match.score ||
-      `${Number(match.scoreA || 0)}-${Number(match.scoreB || 0)}`,
-  }));
+function normalizeMatches(matches: RawRTTMatch[]): RTTMatch[] {
+  return matches.map((match) => {
+    const normalized = {
+      ...match,
+      status: match.status || (match.verified ? "Final" : "Scheduled"),
+      score:
+        match.score ||
+        `${Number(match.scoreA || 0)}-${Number(match.scoreB || 0)}`,
+    } as RTTMatch;
+
+    return normalized;
+  });
 }
 
 export default async function HomePage() {
@@ -217,6 +203,7 @@ export default async function HomePage() {
               <p className="text-sm font-black uppercase tracking-[0.2em] text-rtt-red">
                 No players loaded yet
               </p>
+
               <p className="mt-2 text-sm text-white/70">
                 Backend connected, but no player records were returned to the
                 homepage.
@@ -226,7 +213,8 @@ export default async function HomePage() {
                 <summary className="cursor-pointer text-xs font-black uppercase tracking-[0.2em] text-white/50">
                   Debug feed
                 </summary>
-                <pre className="mt-3 overflow-auto rounded-xl bg-black/40 p-3 text-xs text-white/60">
+
+                <pre className="mt-3 max-h-96 overflow-auto rounded-xl bg-black/40 p-3 text-xs text-white/60">
                   {JSON.stringify(debug, null, 2)}
                 </pre>
               </details>
@@ -238,6 +226,7 @@ export default async function HomePage() {
           <div className="mb-4 flex items-end justify-between gap-3">
             <div>
               <p className="rtt-kicker">The Board</p>
+
               <h2 className="mt-1 text-3xl font-black italic uppercase tracking-[-0.05em]">
                 Top Competitors
               </h2>
