@@ -139,7 +139,8 @@ const CONFIG_FIELDS: ConfigField[] = [
     key: "park.subtitle",
     label: "QR Page Subtitle",
     group: "QR / Park",
-    fallback: "You found the table. Join the next battle and get added to the board.",
+    fallback:
+      "You found the table. Join the next battle and get added to the board.",
     multiline: true,
   },
   {
@@ -301,6 +302,12 @@ const CONFIG_FIELDS: ConfigField[] = [
     fallback: "BOARD",
   },
   {
+    key: "nav.places",
+    label: "Nav Places",
+    group: "Navigation",
+    fallback: "PLACES",
+  },
+  {
     key: "nav.login",
     label: "Nav Login",
     group: "Navigation",
@@ -386,6 +393,46 @@ const CONFIG_FIELDS: ConfigField[] = [
   },
 
   {
+    key: "players.kicker",
+    label: "Players Kicker",
+    group: "Players",
+    fallback: "Crew",
+  },
+  {
+    key: "players.title",
+    label: "Players Title",
+    group: "Players",
+    fallback: "The Crew",
+  },
+  {
+    key: "players.subtitle",
+    label: "Players Subtitle",
+    group: "Players",
+    fallback: "Every player on the table. Every name can be called out.",
+    multiline: true,
+  },
+
+  {
+    key: "rules.kicker",
+    label: "Rules Kicker",
+    group: "Rules",
+    fallback: "Rules",
+  },
+  {
+    key: "rules.title",
+    label: "Rules Title",
+    group: "Rules",
+    fallback: "Table Code",
+  },
+  {
+    key: "rules.subtitle",
+    label: "Rules Subtitle",
+    group: "Rules",
+    fallback: "Fast rules for fast matches.",
+    multiline: true,
+  },
+
+  {
     key: "play.kicker",
     label: "Play Kicker",
     group: "Play",
@@ -401,8 +448,96 @@ const CONFIG_FIELDS: ConfigField[] = [
     key: "play.subtitle",
     label: "Play Subtitle",
     group: "Play",
-    fallback: "Join the next battle, get added to the board, and play tracked matches.",
+    fallback:
+      "Join the next battle, get added to the board, and play tracked matches.",
     multiline: true,
+  },
+
+  {
+    key: "places.kicker",
+    label: "Places Kicker",
+    group: "Places",
+    fallback: "Where To Play",
+  },
+  {
+    key: "places.title",
+    label: "Places Title",
+    group: "Places",
+    fallback: "Places",
+  },
+  {
+    key: "places.subtitle",
+    label: "Places Subtitle",
+    group: "Places",
+    fallback: "Verified and known table tennis spots around NYC.",
+    multiline: true,
+  },
+  {
+    key: "places.featuredLabel",
+    label: "Featured Places Label",
+    group: "Places",
+    fallback: "Featured Spots",
+  },
+  {
+    key: "places.allLabel",
+    label: "All Places Label",
+    group: "Places",
+    fallback: "All Places",
+  },
+  {
+    key: "places.empty",
+    label: "Places Empty State",
+    group: "Places",
+    fallback: "No places loaded yet.",
+  },
+  {
+    key: "places.sourceButton",
+    label: "Places Source Button",
+    group: "Places",
+    fallback: "Source",
+  },
+  {
+    key: "places.directionsButton",
+    label: "Places Directions Button",
+    group: "Places",
+    fallback: "Directions",
+  },
+
+  {
+    key: "playerProfile.kicker",
+    label: "Profile Kicker",
+    group: "Player Profile",
+    fallback: "Competitor Profile",
+  },
+  {
+    key: "playerProfile.rankLabel",
+    label: "Profile Rank Label",
+    group: "Player Profile",
+    fallback: "Rank",
+  },
+  {
+    key: "playerProfile.editButton",
+    label: "Profile Edit Button",
+    group: "Player Profile",
+    fallback: "Edit Profile",
+  },
+  {
+    key: "playerProfile.liveNow",
+    label: "Profile Live Now Label",
+    group: "Player Profile",
+    fallback: "Live Now",
+  },
+  {
+    key: "playerProfile.battleLog",
+    label: "Profile Battle Log Label",
+    group: "Player Profile",
+    fallback: "Battle Log",
+  },
+  {
+    key: "playerProfile.noMatches",
+    label: "Profile No Matches Message",
+    group: "Player Profile",
+    fallback: "No battle log yet.",
   },
 
   {
@@ -410,6 +545,12 @@ const CONFIG_FIELDS: ConfigField[] = [
     label: "Scoring Rule Text",
     group: "Scoring",
     fallback: "Game to 11 / Win by 2",
+  },
+  {
+    key: "system.language",
+    label: "System Language",
+    group: "System",
+    fallback: "en",
   },
 ];
 
