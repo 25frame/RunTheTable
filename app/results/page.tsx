@@ -1,4 +1,5 @@
 import { getRTTData } from "@/lib/googleData";
+import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -7,48 +8,55 @@ export default async function ResultsPage() {
   const matches = data?.matches || [];
 
   return (
-    <main className="rtt-shell text-white">
-      <section className="rtt-max">
-        <p className="rtt-kicker">Battle History</p>
+    <main className="rtt-page">
+      <section className="rtt-page-inner">
+        <PageHero
+          kicker="Battle History"
+          title="Results"
+          subtitle="Receipts stay on the board."
+        />
 
-        <h1 className="rtt-title">RESULTS</h1>
-
-        <p className="rtt-subtitle">Receipts stay on the board.</p>
-
-        <div className="mt-8 grid gap-3">
+        <section className="rtt-section rtt-list">
           {matches.length ? (
             matches.map((m) => (
-              <div key={`${m.matchId}-${m.row}`} className="rtt-card p-4">
+              <article
+                key={`${m.matchId}-${m.row}`}
+                className="rtt-mobile-card"
+              >
                 <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="truncate text-xl font-black uppercase">
+                    <p className="truncate text-xl font-black uppercase tracking-[-0.04em]">
                       {m.playerA} vs {m.playerB}
                     </p>
 
-                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-white/35">
+                    <p className="mt-1 rtt-muted-line">
                       {m.type || "Battle"} / {m.status || "Scheduled"}
                     </p>
                   </div>
 
-                  <div className="shrink-0 text-3xl font-black text-rtt-red">
+                  <p className="shrink-0 text-3xl font-black text-rtt-red">
                     {m.score}
-                  </div>
+                  </p>
                 </div>
-              </div>
+              </article>
             ))
           ) : (
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 text-white/50">
-              <p>No results loaded yet.</p>
-
-              {data?.error ? (
-                <p className="mt-2 text-xs text-red-300">
-                  Feed error: {data.error}
-                </p>
-              ) : null}
-            </div>
+            <EmptyState title="No results loaded yet." error={data?.error} />
           )}
-        </div>
+        </section>
       </section>
     </main>
+  );
+}
+
+function EmptyState({ title, error }: { title: string; error?: string }) {
+  return (
+    <div className="rtt-mobile-card">
+      <p className="font-black uppercase text-white/60">{title}</p>
+
+      {error ? (
+        <p className="mt-2 text-xs text-red-300">Feed error: {error}</p>
+      ) : null}
+    </div>
   );
 }

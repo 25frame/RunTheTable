@@ -2,197 +2,339 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   RTT GLOBAL THEME
+   ============================================================ */
+
 :root {
   --rtt-red: #e10600;
   --rtt-bg: #030303;
-  --rtt-panel: rgba(255,255,255,0.055);
-  --rtt-line: rgba(255,255,255,0.10);
+  --rtt-panel: rgba(255, 255, 255, 0.055);
+  --rtt-panel-soft: rgba(255, 255, 255, 0.04);
+  --rtt-line: rgba(255, 255, 255, 0.1);
+  --rtt-muted: rgba(255, 255, 255, 0.52);
+  --rtt-faint: rgba(255, 255, 255, 0.35);
 }
 
-html { background: var(--rtt-bg); }
+html {
+  background: var(--rtt-bg);
+}
 
 body {
   margin: 0;
+  min-height: 100vh;
   color: white;
   background:
-    radial-gradient(circle at 20% -10%, rgba(225, 6, 0, 0.35), transparent 28%),
-    radial-gradient(circle at 90% 0%, rgba(255,255,255,0.08), transparent 22%),
-    linear-gradient(180deg, #060606 0%, #000 42%, #070707 100%);
-  min-height: 100vh;
+    radial-gradient(circle at 18% -8%, rgba(225, 6, 0, 0.32), transparent 26%),
+    radial-gradient(circle at 92% 0%, rgba(255, 255, 255, 0.07), transparent 22%),
+    linear-gradient(180deg, #060606 0%, #000 45%, #070707 100%);
 }
 
-* { box-sizing: border-box; }
-button, a { -webkit-tap-highlight-color: transparent; }
-a { text-decoration: none; }
+* {
+  box-sizing: border-box;
+}
 
-.rtt-shell { min-height: 100vh; padding: 18px 16px 96px; }
-.rtt-max { width: 100%; max-width: 1120px; margin: 0 auto; }
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input,
+textarea,
+select {
+  color-scheme: dark;
+}
+
+/* ============================================================
+   LEGACY COMPATIBILITY
+   Keep these so older pages/components do not break.
+   New pages should prefer .rtt-page and .rtt-page-inner.
+   ============================================================ */
+
+.rtt-shell {
+  min-height: 100vh;
+  padding: 1rem 1.25rem 6.5rem;
+  color: #fff;
+}
+
+.rtt-max {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
 
 .rtt-kicker {
   color: var(--rtt-red);
-  font-size: 11px;
+  font-size: 0.68rem;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.26em;
 }
 
 .rtt-title {
-  margin-top: 10px;
-  font-size: clamp(52px, 15vw, 112px);
+  margin-top: 0.75rem;
+  font-size: clamp(3.35rem, 14.5vw, 7.5rem);
   line-height: 0.82;
-  letter-spacing: -0.08em;
-  font-weight: 1000;
+  letter-spacing: -0.085em;
+  font-weight: 900;
   font-style: italic;
   text-transform: uppercase;
 }
 
 .rtt-subtitle {
-  margin-top: 18px;
-  max-width: 540px;
-  color: rgba(255,255,255,0.62);
-  font-size: 15px;
-  line-height: 1.65;
-  font-weight: 700;
+  margin-top: 1.1rem;
+  max-width: 42rem;
+  color: var(--rtt-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
 }
 
 .rtt-card {
   border: 1px solid var(--rtt-line);
   background: var(--rtt-panel);
-  border-radius: 28px;
-  box-shadow: 0 24px 70px rgba(0,0,0,0.45);
+  border-radius: 1.65rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(12px);
 }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
 
 .rtt-cta,
 .rtt-secondary {
   display: inline-flex;
-  min-height: 54px;
+  min-height: 3.35rem;
   align-items: center;
   justify-content: center;
-  border-radius: 20px;
-  padding: 0 20px;
-  font-size: 12px;
-  font-weight: 1000;
+  border-radius: 1.25rem;
+  padding: 0 1.25rem;
+  font-size: 0.74rem;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.18em;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease,
+    color 140ms ease;
 }
 
-.rtt-cta { background: var(--rtt-red); color: white; }
-.rtt-secondary { border: 1px solid var(--rtt-line); background: rgba(255,255,255,0.055); color: rgba(255,255,255,0.78); }
+.rtt-cta {
+  background: var(--rtt-red);
+  color: white;
+}
+
+.rtt-secondary {
+  border: 1px solid var(--rtt-line);
+  background: var(--rtt-panel);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.rtt-cta:active,
+.rtt-secondary:active {
+  transform: scale(0.985);
+}
+
+/* ============================================================
+   MOBILE-FIRST PAGE SYSTEM
+   ============================================================ */
+
+.rtt-page {
+  min-height: 100vh;
+  padding-bottom: 6.5rem;
+  color: #fff;
+}
+
+.rtt-page-inner {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 0;
+}
+
+.rtt-hero {
+  padding-top: 0;
+  padding-bottom: 1.35rem;
+}
+
+.rtt-hero-kicker {
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--rtt-red);
+}
+
+.rtt-hero-title {
+  margin-top: 0.7rem;
+  font-size: clamp(3.25rem, 14vw, 7.5rem);
+  line-height: 0.82;
+  letter-spacing: -0.085em;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.rtt-hero-subtitle {
+  margin-top: 1rem;
+  max-width: 42rem;
+  font-size: 0.96rem;
+  line-height: 1.58;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rtt-muted);
+}
+
+.rtt-section {
+  margin-top: 1.35rem;
+}
+
+.rtt-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.rtt-mobile-card {
+  border: 1px solid var(--rtt-line);
+  background: var(--rtt-panel-soft);
+  border-radius: 1.5rem;
+  padding: 1rem;
+}
+
+.rtt-mobile-card-hot {
+  border-color: rgba(225, 6, 0, 0.42);
+  background: rgba(225, 6, 0, 0.1);
+  box-shadow: 0 0 32px rgba(225, 6, 0, 0.12);
+}
+
+.rtt-mini-kicker {
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rtt-red);
+}
+
+.rtt-compact-title {
+  font-size: 1.65rem;
+  line-height: 0.95;
+  letter-spacing: -0.055em;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.rtt-muted-line {
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--rtt-faint);
+}
+
+.rtt-bottom-safe {
+  padding-bottom: 6.5rem;
+}
+
+/* ============================================================
+   OPTIONAL OLD BOTTOM NAV CLASS
+   Current Nav.tsx uses Tailwind classes, but keep this in case
+   any page still references .rtt-bottom-nav.
+   ============================================================ */
 
 .rtt-bottom-nav {
   position: fixed;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
   z-index: 60;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 24px;
-  background: rgba(0,0,0,0.86);
-  padding: 8px;
+  gap: 0.25rem;
+  border: 1px solid var(--rtt-line);
+  border-radius: 1.6rem;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 0.375rem;
   backdrop-filter: blur(18px);
-  box-shadow: 0 20px 70px rgba(0,0,0,0.65);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.65);
 }
 
 .rtt-bottom-nav a {
   display: flex;
-  min-height: 44px;
+  min-height: 2.75rem;
   align-items: center;
   justify-content: center;
-  border-radius: 17px;
-  color: rgba(255,255,255,0.62);
-  font-size: 10px;
-  font-weight: 1000;
+  border-radius: 1.2rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.62rem;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .rtt-bottom-nav a:active,
-.rtt-bottom-nav a:hover { background: rgba(225,6,0,0.22); color: white; }
-
-input {
-  color-scheme: dark;
-}
-
-@media (min-width: 768px) {
-  .rtt-shell { padding: 36px 28px 120px; }
-  .rtt-bottom-nav {
-    left: 50%;
-    right: auto;
-    width: min(640px, calc(100vw - 32px));
-    transform: translateX(-50%);
-  }
-}
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-.rtt-shell {
-  min-height: 100vh;
-  padding: 18px 16px 96px;
-}
-
-.rtt-max {
-  width: 100%;
-  max-width: 1120px;
-  margin: 0 auto;
-}
-
-.rtt-kicker {
-  color: #E10600;
-  font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.28em;
-}
-
-.rtt-title {
-  margin-top: 10px;
-  font-size: clamp(52px, 15vw, 112px);
-  line-height: 0.82;
-  letter-spacing: -0.08em;
-  font-weight: 1000;
-  font-style: italic;
-  text-transform: uppercase;
-}
-
-.rtt-subtitle {
-  margin-top: 18px;
-  max-width: 540px;
-  color: rgba(255,255,255,0.62);
-  font-size: 15px;
-  line-height: 1.65;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.rtt-cta,
-.rtt-secondary {
-  display: inline-flex;
-  min-height: 54px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 20px;
-  padding: 0 20px;
-  font-size: 12px;
-  font-weight: 1000;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-}
-
-.rtt-cta {
-  background: #E10600;
+.rtt-bottom-nav a:hover {
+  background: rgba(225, 6, 0, 0.22);
   color: white;
 }
 
-.rtt-secondary {
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(255,255,255,0.055);
-  color: rgba(255,255,255,0.78);
+/* ============================================================
+   DESKTOP / TABLET
+   ============================================================ */
+
+@media (min-width: 768px) {
+  .rtt-shell {
+    padding: 2rem 2rem 7.5rem;
+  }
+
+  .rtt-page {
+    padding-bottom: 7.5rem;
+  }
+
+  .rtt-page-inner {
+    padding: 2rem 2rem 0;
+  }
+
+  .rtt-hero {
+    padding-top: 0.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .rtt-hero-subtitle,
+  .rtt-subtitle {
+    font-size: 1.2rem;
+  }
+
+  .rtt-section {
+    margin-top: 2rem;
+  }
+
+  .rtt-mobile-card {
+    padding: 1.25rem;
+    border-radius: 1.75rem;
+  }
+
+  .rtt-compact-title {
+    font-size: 2rem;
+  }
+
+  .rtt-bottom-nav {
+    left: 50%;
+    right: auto;
+    width: min(640px, calc(100vw - 2rem));
+    transform: translateX(-50%);
+  }
 }

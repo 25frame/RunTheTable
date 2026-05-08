@@ -1,56 +1,61 @@
 import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
+import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 60;
 
 export default async function PlayersPage() {
   const data = await getRTTData();
   const players = data?.players || [];
 
   return (
-    <main className="rtt-shell text-white">
-      <section className="rtt-max">
-        <p className="rtt-kicker">Crew</p>
+    <main className="rtt-page">
+      <section className="rtt-page-inner">
+        <PageHero
+          kicker="Crew"
+          title="The Crew"
+          subtitle="Every player on the table. Every name can be called out."
+        />
 
-        <h1 className="rtt-title">
-          The
-          <br />
-          Crew
-        </h1>
+        <section className="rtt-section rtt-list">
+          {players.length ? (
+            players.map((p) => (
+              <Link
+                key={p.id}
+                href={`/players/${p.id}`}
+                className="rtt-mobile-card"
+              >
+                <p className="rtt-mini-kicker">
+                  {p.id} / Rank #{p.rank}
+                </p>
 
-        <p className="rtt-subtitle">
-          Every player on the table. Every name can be called out.
-        </p>
+                <h2 className="mt-3 truncate text-2xl font-black uppercase tracking-[-0.05em]">
+                  {p.handle || p.name}
+                </h2>
 
-        <div className="mt-8 grid gap-4">
-          {players.map((p) => (
-            <Link
-              key={p.id}
-              href={`/players/${p.id}`}
-              className="rounded-[2rem] border border-white/10 bg-white/5 p-5"
-            >
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-rtt-red">
-                {p.id} / Rank #{p.rank}
-              </p>
-
-              <h2 className="mt-2 text-3xl font-black uppercase">
-                {p.handle || p.name}
-              </h2>
-
-              <p className="mt-2 text-sm font-bold text-white/45">
-                {p.skill} / {p.wins}W {p.losses}L / {p.points} pts
-              </p>
-            </Link>
-          ))}
-
-          {!players.length && (
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 text-white/50">
-              No players loaded.
-            </div>
+                <p className="mt-2 rtt-muted-line">
+                  {p.skill || "Unranked"} / {p.wins}W {p.losses}L /{" "}
+                  {p.points} pts
+                </p>
+              </Link>
+            ))
+          ) : (
+            <EmptyState title="No players loaded." error={data?.error} />
           )}
-        </div>
+        </section>
       </section>
     </main>
+  );
+}
+
+function EmptyState({ title, error }: { title: string; error?: string }) {
+  return (
+    <div className="rtt-mobile-card">
+      <p className="font-black uppercase text-white/60">{title}</p>
+
+      {error ? (
+        <p className="mt-2 text-xs text-red-300">Feed error: {error}</p>
+      ) : null}
+    </div>
   );
 }

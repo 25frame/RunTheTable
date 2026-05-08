@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
+import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -8,52 +9,27 @@ export default async function StandingsPage() {
   const players = data?.players || [];
 
   return (
-    <main className="rtt-shell min-h-screen pb-32 text-white">
-      <section className="mx-auto w-full max-w-5xl px-5 pt-8 md:px-8 md:pt-14">
-        {/* HERO */}
-        <section>
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-rtt-red">
-            Board
-          </p>
+    <main className="rtt-page">
+      <section className="rtt-page-inner">
+        <PageHero
+          kicker="Board"
+          title="The Board"
+          subtitle="Rankings update after verified battles."
+        />
 
-          <div className="mt-3 flex items-end justify-between gap-4">
-            <div>
-              <h1 className="text-[clamp(3.6rem,18vw,8rem)] font-black italic uppercase leading-[0.8] tracking-[-0.09em]">
-                The
-                <br />
-                Board
-              </h1>
-            </div>
-
-            <div className="mb-2 hidden rounded-full bg-rtt-red px-5 py-3 text-xs font-black uppercase tracking-[0.18em] md:block">
-              Live
-            </div>
-          </div>
-
-          <p className="mt-5 max-w-xl text-base font-black uppercase leading-7 tracking-[0.04em] text-white/50 md:text-xl">
-            Rankings update after verified battles.
-          </p>
-        </section>
-
-        {/* QUICK STATS */}
-        <section className="mt-7 grid grid-cols-3 gap-2">
+        <section className="grid grid-cols-3 gap-2">
           <MiniStat label="Players" value={players.length} />
           <MiniStat
             label="King"
             value={players[0]?.handle || players[0]?.name || "Open"}
           />
-          <MiniStat
-            label="Top Pts"
-            value={players[0]?.points ?? 0}
-          />
+          <MiniStat label="Top Pts" value={players[0]?.points ?? 0} />
         </section>
 
-        {/* BOARD LIST */}
-        <section className="mt-7 grid gap-3">
+        <section className="rtt-section rtt-list">
           {players.length ? (
             players.map((p, index) => {
               const isKing = index === 0;
-              const displayName = p.handle || p.name;
 
               return (
                 <Link
@@ -61,8 +37,8 @@ export default async function StandingsPage() {
                   href={`/players/${p.id}`}
                   className={
                     isKing
-                      ? "rounded-[1.75rem] border border-rtt-red/40 bg-rtt-red/10 p-4 shadow-[0_0_32px_rgba(255,0,0,0.12)] transition active:scale-[0.99] md:p-5"
-                      : "rounded-[1.75rem] border border-white/10 bg-white/[0.045] p-4 transition active:scale-[0.99] md:p-5"
+                      ? "rtt-mobile-card rtt-mobile-card-hot"
+                      : "rtt-mobile-card"
                   }
                 >
                   <div className="flex items-center justify-between gap-4">
@@ -78,12 +54,12 @@ export default async function StandingsPage() {
                       </div>
 
                       <div className="min-w-0">
-                        <p className="truncate text-2xl font-black uppercase tracking-[-0.05em] md:text-3xl">
-                          {displayName}
-                        </p>
+                        <h2 className="truncate text-2xl font-black uppercase tracking-[-0.05em]">
+                          {p.handle || p.name}
+                        </h2>
 
                         <p className="mt-1 truncate text-[11px] font-black uppercase tracking-[0.14em] text-white/40">
-                          {p.skill || "Unranked"}
+                          {p.skill || "Unranked"} · {p.wins}W / {p.losses}L
                         </p>
                       </div>
                     </div>
@@ -108,15 +84,7 @@ export default async function StandingsPage() {
               );
             })
           ) : (
-            <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.045] p-6 text-white/50">
-              <p className="font-black uppercase">No standings loaded.</p>
-
-              {data?.error ? (
-                <p className="mt-2 text-xs text-red-300">
-                  Feed error: {data.error}
-                </p>
-              ) : null}
-            </div>
+            <EmptyState title="No standings loaded." error={data?.error} />
           )}
         </section>
       </section>
@@ -160,6 +128,18 @@ function CompactStat({
       <p className="mt-1 text-xl font-black leading-none text-white">
         {value}
       </p>
+    </div>
+  );
+}
+
+function EmptyState({ title, error }: { title: string; error?: string }) {
+  return (
+    <div className="rtt-mobile-card">
+      <p className="font-black uppercase text-white/60">{title}</p>
+
+      {error ? (
+        <p className="mt-2 text-xs text-red-300">Feed error: {error}</p>
+      ) : null}
     </div>
   );
 }

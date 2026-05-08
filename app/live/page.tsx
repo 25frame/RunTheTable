@@ -1,65 +1,98 @@
+import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
+import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export default async function LivePage() {
   const data = await getRTTData();
   const matches = data?.matches || [];
+
   const liveMatch =
     matches.find((m) => (m.status || "").toLowerCase() === "live") ||
     matches[0];
 
-  return (
-    <main className="rtt-shell text-white">
-      <section className="rtt-max">
-        <p className="rtt-kicker">Live Match</p>
+  const recent = matches.slice(0, 5);
 
-        <h1 className="rtt-title">
-          Live
-          <br />
-          Battle
-        </h1>
+  return (
+    <main className="rtt-page">
+      <section className="rtt-page-inner">
+        <PageHero
+          kicker="Live Match"
+          title="Live Battle"
+          subtitle="Current action and recent receipts from the table."
+        />
 
         {liveMatch ? (
-          <div className="mt-8 rounded-[2rem] border border-rtt-red/35 bg-rtt-red/10 p-6">
-            <p className="rtt-kicker">{liveMatch.status || "Match"}</p>
+          <section className="rtt-section">
+            <article className="rtt-mobile-card rtt-mobile-card-hot">
+              <p className="rtt-mini-kicker">
+                {liveMatch.status || "Scheduled"}
+              </p>
 
-            <h2 className="mt-4 text-4xl font-black uppercase">
-              {liveMatch.playerA} vs {liveMatch.playerB}
-            </h2>
+              <h2 className="mt-4 text-3xl font-black uppercase tracking-[-0.05em]">
+                {liveMatch.playerA} vs {liveMatch.playerB}
+              </h2>
 
-            <p className="mt-6 text-7xl font-black text-rtt-red">
-              {liveMatch.scoreA} — {liveMatch.scoreB}
-            </p>
+              <p className="mt-5 text-7xl font-black leading-none text-rtt-red">
+                {liveMatch.score}
+              </p>
 
-            <p className="mt-4 text-sm font-bold uppercase tracking-[0.14em] text-white/50">
-              {liveMatch.type} / {liveMatch.table}
-            </p>
-          </div>
+              <p className="mt-4 rtt-muted-line">
+                {liveMatch.status || "Match"} / {liveMatch.table || "Table"}
+              </p>
+            </article>
+          </section>
         ) : (
-          <div className="mt-8 rounded-[2rem] border border-white/10 bg-white/5 p-8">
-            <p className="text-white/50">No live match yet.</p>
-          </div>
+          <section className="rtt-section">
+            <div className="rtt-mobile-card">
+              <p className="font-black uppercase text-white/60">
+                No live match yet.
+              </p>
+            </div>
+          </section>
         )}
 
-        <section className="mt-10">
-          <p className="rtt-kicker">Recent Battles</p>
+        <section className="rtt-section">
+          <div className="mb-4 flex items-end justify-between">
+            <div>
+              <p className="rtt-mini-kicker">Recent</p>
+              <h2 className="mt-1 text-2xl font-black uppercase tracking-[-0.04em]">
+                Receipts
+              </h2>
+            </div>
 
-          <div className="mt-5 grid gap-4">
-            {matches.slice(0, 6).map((m) => (
-              <div
+            <Link
+              href="/results"
+              className="text-[10px] font-black uppercase tracking-[0.18em] text-rtt-red"
+            >
+              Results
+            </Link>
+          </div>
+
+          <div className="rtt-list">
+            {recent.map((m) => (
+              <Link
                 key={`${m.matchId}-${m.row}`}
-                className="rounded-[2rem] border border-white/10 bg-white/5 p-5"
+                href="/results"
+                className="rtt-mobile-card"
               >
-                <p className="text-xl font-black uppercase">
-                  {m.playerA} vs {m.playerB}
-                </p>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="truncate text-xl font-black uppercase tracking-[-0.04em]">
+                      {m.playerA} vs {m.playerB}
+                    </p>
 
-                <p className="mt-2 text-3xl font-black text-rtt-red">
-                  {m.score}
-                </p>
-              </div>
+                    <p className="mt-1 rtt-muted-line">
+                      {m.type || "Battle"} / {m.status || "Scheduled"}
+                    </p>
+                  </div>
+
+                  <p className="shrink-0 text-2xl font-black text-rtt-red">
+                    {m.score}
+                  </p>
+                </div>
+              </Link>
             ))}
           </div>
         </section>
