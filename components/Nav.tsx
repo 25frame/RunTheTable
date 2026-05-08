@@ -55,13 +55,13 @@ export function Nav() {
     ? cfg(config, "nav.admin", "ADMIN")
     : cfg(config, "nav.login", "LOGIN");
 
-  const items = [
-    { label: cfg(config, "nav.home", "HOME"), href: "/" },
-    { label: cfg(config, "nav.join", "JOIN"), href: "/join" },
-    { label: cfg(config, "nav.live", "LIVE"), href: "/live" },
-    { label: cfg(config, "nav.board", "BOARD"), href: "/standings" },
-    { label: loginLabel, href: loginHref },
-  ];
+const items = [
+  { label: cfg(config, "nav.home", "HOME"), href: "/" },
+  { label: cfg(config, "nav.join", "JOIN"), href: "/join" },
+  { label: cfg(config, "nav.live", "LIVE"), href: "/live" },
+  { label: cfg(config, "nav.board", "BOARD"), href: "/standings" },
+  { label: cfg(config, "nav.places", "PLACES"), href: "/places" },
+];
 
   return (
     <>

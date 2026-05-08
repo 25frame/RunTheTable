@@ -20,7 +20,6 @@ const adminLinks = [
   ["/admin/setup", "Setup"],
   ["/live", "Public"],
 ] as const;
-
 export function AdminShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
