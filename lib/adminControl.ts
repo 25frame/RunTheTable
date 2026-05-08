@@ -1,4 +1,5 @@
 import { authedPost } from "@/lib/auth";
+import type { RTTData, RTTUser } from "@/lib/googleData";
 
 export type AdminHealthTab = {
   name: string;
@@ -13,13 +14,32 @@ export type AdminHealth = {
   formUrl: string;
   tabs: AdminHealthTab[];
   checkedAt: string;
+  publicFeed?: {
+    playersSheetRows: number;
+    standingsSheetRows: number;
+    matchesSheetRows: number;
+    registrationsSheetRows: number;
+    publicPlayersReturned: number;
+  };
+  error?: string;
+  message?: string;
 };
 
-export async function adminHealthCheck() {
-  return authedPost("adminHealthCheck", {}) as Promise<AdminHealth>;
-}
+export type AdminActionResult = {
+  ok: boolean;
+  message?: string;
+  error?: string;
+  feed?: RTTData;
+};
 
-export async function createPlayer(payload: {
+export type FormSyncResult = AdminActionResult & {
+  addedPlayers?: number;
+  updatedPlayers?: number;
+  addedRegistrations?: number;
+  skippedRows?: number;
+};
+
+export type CreatePlayerPayload = {
   displayName: string;
   fullName?: string;
   email?: string;
@@ -29,11 +49,9 @@ export async function createPlayer(payload: {
   paymentHandle?: string;
   photo?: string;
   status?: string;
-}) {
-  return authedPost("createPlayer", payload);
-}
+};
 
-export async function updatePlayerAdmin(payload: {
+export type UpdatePlayerPayload = {
   playerId: string;
   displayName?: string;
   fullName?: string;
@@ -44,35 +62,164 @@ export async function updatePlayerAdmin(payload: {
   paymentHandle?: string;
   photo?: string;
   status?: string;
-}) {
-  return authedPost("updatePlayerAdmin", payload);
-}
+};
 
-export async function createUser(payload: {
+export type CreateUserPayload = {
   email: string;
   password: string;
   role: "admin" | "player";
   playerId?: string;
-}) {
-  return authedPost("createUser", payload);
-}
+};
 
-export async function createMatch(payload: {
+export type CreateMatchPayload = {
   eventId?: string;
   type?: string;
   table?: string;
   playerAId: string;
   playerBId: string;
-}) {
-  return authedPost("createMatch", payload);
+};
+
+export type UpdateLiveScorePayload = {
+  row: number;
+  scoreA: number;
+  scoreB: number;
+};
+
+export type SaveLiveMatchPayload = {
+  row: number;
+  scoreA: number;
+  scoreB: number;
+};
+
+export type ListUsersResult = {
+  ok: boolean;
+  users: RTTUser[];
+  error?: string;
+};
+
+export async function adminHealthCheck(): Promise<AdminHealth> {
+  return authedPost<Record<string, never>, AdminHealth>("adminHealthCheck", {});
 }
 
+export async function runSetup(): Promise<AdminActionResult> {
+  return authedPost<Record<string, never>, AdminActionResult>("runSetup", {});
+}
+
+export async function repairRTTSiteData(): Promise<AdminActionResult> {
+  return authedPost<Record<string, never>, AdminActionResult>(
+    "repairRTTSiteData",
+    {}
+  );
+}
+
+export async function syncForm(): Promise<FormSyncResult> {
+  return authedPost<Record<string, never>, FormSyncResult>("syncForm", {});
+}
+
+export async function recalcStandings(): Promise<AdminActionResult> {
+  return authedPost<Record<string, never>, AdminActionResult>(
+    "recalcStandings",
+    {}
+  );
+}
+
+export async function createPlayer(
+  payload: CreatePlayerPayload
+): Promise<AdminActionResult & { playerId?: string }> {
+  return authedPost<CreatePlayerPayload, AdminActionResult & { playerId?: string }>(
+    "createPlayer",
+    payload
+  );
+}
+
+export async function updatePlayerAdmin(
+  payload: UpdatePlayerPayload
+): Promise<AdminActionResult & { playerId?: string }> {
+  return authedPost<UpdatePlayerPayload, AdminActionResult & { playerId?: string }>(
+    "updatePlayerProfile",
+    payload
+  );
+}
+
+export async function createUser(
+  payload: CreateUserPayload
+): Promise<AdminActionResult & { userId?: string }> {
+  return authedPost<CreateUserPayload, AdminActionResult & { userId?: string }>(
+    "createUser",
+    payload
+  );
+}
+
+export async function listUsers(): Promise<ListUsersResult> {
+  return authedPost<Record<string, never>, ListUsersResult>("listUsers", {});
+}
+
+export async function setUserStatus(payload: {
+  userId: string;
+  status: "active" | "inactive";
+}): Promise<AdminActionResult & { userId?: string; status?: string }> {
+  return authedPost<
+    { userId: string; status: "active" | "inactive" },
+    AdminActionResult & { userId?: string; status?: string }
+  >("setUserStatus", payload);
+}
+
+export async function deleteUser(payload: {
+  userId: string;
+}): Promise<AdminActionResult & { userId?: string }> {
+  return authedPost<{ userId: string }, AdminActionResult & { userId?: string }>(
+    "deleteUser",
+    payload
+  );
+}
+
+export async function createMatch(
+  payload: CreateMatchPayload
+): Promise<AdminActionResult & { matchId?: string }> {
+  return authedPost<CreateMatchPayload, AdminActionResult & { matchId?: string }>(
+    "createMatch",
+    payload
+  );
+}
+
+export async function updateLiveScore(
+  payload: UpdateLiveScorePayload
+): Promise<AdminActionResult & { score?: string }> {
+  return authedPost<
+    UpdateLiveScorePayload,
+    AdminActionResult & { score?: string }
+  >("updateLiveScore", payload);
+}
+
+export async function saveLiveMatch(
+  payload: SaveLiveMatchPayload
+): Promise<AdminActionResult & { winner?: string; score?: string }> {
+  return authedPost<
+    SaveLiveMatchPayload,
+    AdminActionResult & { winner?: string; score?: string }
+  >("saveLiveMatch", payload);
+}
+
+/**
+ * These functions are only safe to use after the Apps Script backend exposes:
+ * - updateSetup
+ * - updatePayoutConfig
+ *
+ * Your current Apps Script does not include those actions yet.
+ */
 export async function updateSetup(payload: {
   activeEventId?: string;
   winPoints?: number;
   lossPoints?: number;
-}) {
-  return authedPost("updateSetup", payload);
+}): Promise<AdminActionResult> {
+  return authedPost<
+    {
+      activeEventId?: string;
+      winPoints?: number;
+      lossPoints?: number;
+    },
+    AdminActionResult
+  >("updateSetup", payload);
 }
 
 export async function updatePayoutConfig(payload: {
@@ -84,6 +231,18 @@ export async function updatePayoutConfig(payload: {
   firstPlacePayout?: number;
   secondPlacePayout?: number;
   thirdPlacePayout?: number;
-}) {
-  return authedPost("updatePayoutConfig", payload);
+}): Promise<AdminActionResult> {
+  return authedPost<
+    {
+      eventId?: string;
+      paidPlayers?: number;
+      totalCollected?: number;
+      operationsCut?: number;
+      prizePool?: number;
+      firstPlacePayout?: number;
+      secondPlacePayout?: number;
+      thirdPlacePayout?: number;
+    },
+    AdminActionResult
+  >("updatePayoutConfig", payload);
 }
