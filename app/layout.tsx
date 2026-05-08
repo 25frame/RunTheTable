@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Nav } from "@/components/Nav";
+import { SwipeNavigator } from "@/components/SwipeNavigator";
 
 export const metadata = {
   title: "Run The Table",
@@ -14,8 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <SwipeNavigator />
         <Nav />
-        {children}
+        <div className="relative z-10">{children}</div>
       </body>
     </html>
   );
