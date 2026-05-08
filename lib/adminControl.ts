@@ -68,6 +68,17 @@ export type UpdatePlayerPayload = {
   status?: string;
 };
 
+export type DeletePlayerPayload = {
+  playerId: string;
+};
+
+export type DeletePlayerResult = AdminActionResult & {
+  playerId?: string;
+  playerName?: string;
+  hadVerifiedHistory?: boolean;
+  cancelledOpenMatches?: number;
+};
+
 export type CreateUserPayload = {
   email: string;
   password: string;
@@ -198,6 +209,15 @@ export async function updatePlayerAdmin(
   >("updatePlayerProfile", payload);
 }
 
+export async function deletePlayer(
+  payload: DeletePlayerPayload
+): Promise<DeletePlayerResult> {
+  return authedPost<DeletePlayerPayload, DeletePlayerResult>(
+    "deletePlayer",
+    payload
+  );
+}
+
 export async function createUser(
   payload: CreateUserPayload
 ): Promise<AdminActionResult & { userId?: string }> {
@@ -295,8 +315,7 @@ export async function deletePlace(payload: {
 /**
  * Reserved helper.
  *
- * Your current Apps Script backend does not yet expose "updateSetup".
- * Do not call this from active UI until the Apps Script doPost() supports it.
+ * Only use this from UI after Code.gs supports updateSetup.
  */
 export async function updateSetup(payload: {
   activeEventId?: string;
@@ -316,8 +335,7 @@ export async function updateSetup(payload: {
 /**
  * Reserved helper.
  *
- * Your current Apps Script backend does not yet expose "updatePayoutConfig".
- * Do not call this from active UI until the Apps Script doPost() supports it.
+ * Only use this from UI after Code.gs supports updatePayoutConfig.
  */
 export async function updatePayoutConfig(payload: {
   eventId?: string;
