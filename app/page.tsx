@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
+import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
@@ -9,27 +10,16 @@ export default async function HomePage() {
   const top = players.slice(0, 5);
 
   return (
-    <main className="rtt-shell min-h-screen pb-28 text-white">
-      <section className="mx-auto w-full max-w-5xl px-5 pt-6 md:px-8 md:pt-10">
-        {/* HERO */}
-        <section>
-          <p className="text-[11px] font-black uppercase tracking-[0.26em] text-rtt-red">
-            RTT NYC
-          </p>
-
-          <h1 className="mt-3 max-w-4xl text-[clamp(3.4rem,14vw,8rem)] font-black italic uppercase leading-[0.84] tracking-[-0.08em]">
-            Run The
-            <br />
-            Table
-          </h1>
-
-          <p className="mt-4 max-w-2xl text-base font-black uppercase leading-7 tracking-[0.03em] text-white/55 md:text-xl">
-            Scan in. Get ranked. Battle live. Climb the board.
-          </p>
-        </section>
+    <main className="rtt-page">
+      <section className="rtt-page-inner">
+        <PageHero
+          kicker="RTT NYC"
+          title="Run The Table"
+          subtitle="Scan in. Get ranked. Battle live. Climb the board."
+        />
 
         {/* CTA */}
-        <section className="mt-6 grid gap-3">
+        <section className="grid gap-3">
           <Link href="/park" className="rtt-cta">
             Get Ranked
           </Link>
@@ -44,12 +34,10 @@ export default async function HomePage() {
         </section>
 
         {/* TOP BOARD */}
-        <section className="mt-10">
+        <section className="rtt-section">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-rtt-red">
-                Live Players
-              </p>
+              <p className="rtt-mini-kicker">Live Players</p>
 
               <h2 className="mt-1 text-2xl font-black uppercase tracking-[-0.04em] md:text-3xl">
                 Top Board
@@ -64,7 +52,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid gap-0">
+          <div className="grid">
             {top.length ? (
               top.map((p) => (
                 <Link
@@ -87,6 +75,7 @@ export default async function HomePage() {
                       <p className="text-2xl font-black text-rtt-red md:text-3xl">
                         {p.points}
                       </p>
+
                       <p className="text-[9px] font-black uppercase tracking-[0.16em] text-white/35">
                         pts
                       </p>
@@ -95,21 +84,25 @@ export default async function HomePage() {
                 </Link>
               ))
             ) : (
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-5">
-                <p className="text-base font-black uppercase">
-                  No players loaded yet.
-                </p>
-
-                {data?.error ? (
-                  <p className="mt-3 rounded-xl border border-red-500/30 bg-red-950/30 p-3 text-xs text-red-200">
-                    Feed error: {data.error}
-                  </p>
-                ) : null}
-              </div>
+              <EmptyState title="No players loaded yet." error={data?.error} />
             )}
           </div>
         </section>
       </section>
     </main>
+  );
+}
+
+function EmptyState({ title, error }: { title: string; error?: string }) {
+  return (
+    <div className="rtt-mobile-card">
+      <p className="text-base font-black uppercase">{title}</p>
+
+      {error ? (
+        <p className="mt-3 rounded-xl border border-red-500/30 bg-red-950/30 p-3 text-xs text-red-200">
+          Feed error: {error}
+        </p>
+      ) : null}
+    </div>
   );
 }
