@@ -7,97 +7,170 @@ const APPS_SCRIPT_URL =
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 30;
+/**
+ * API route cache behavior:
+ * - Allows Vercel/Next to cache the route.
+ * - Keeps data reasonably fresh.
+ * - Avoids hitting Google Apps Script on every page load.
+ */
+export const revalidate = 60;
+
+type CachedRTTResponse = {
+  data: Record<string, unknown>;
+  cachedAt: number;
+};
+
+let memoryCache: CachedRTTResponse | null = null;
+
+const MEMORY_CACHE_MS = 60 * 1000;
 
 export async function GET() {
-  try {
-    const response = await fetch(`${APPS_SCRIPT_URL}?ts=${Date.now()}`, {
-      next: { revalidate: 30 },
-    });
+  const now = Date.now();
 
-    if (!response.ok) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: `Apps Script failed with HTTP ${response.status}`,
-          updatedAt: new Date().toISOString(),
-          formUrl: FORM_URL,
-          players: [],
-          matches: [],
-          weeklyResults: [],
-          payout: null,
-        },
-        {
-          status: 200,
-          headers: {
-            "Cache-Control": "s-maxage=15, stale-while-revalidate=120",
-          },
-        }
-      );
-    }
-
-    const text = await response.text();
-
-    let data: Record<string, unknown>;
-
-    try {
-      data = JSON.parse(text) as Record<string, unknown>;
-    } catch {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: "Apps Script returned non-JSON response.",
-          raw: text,
-          updatedAt: new Date().toISOString(),
-          formUrl: FORM_URL,
-          players: [],
-          matches: [],
-          weeklyResults: [],
-          payout: null,
-        },
-        {
-          status: 200,
-          headers: {
-            "Cache-Control": "s-maxage=15, stale-while-revalidate=120",
-          },
-        }
-      );
-    }
-
+  /**
+   * Fast path:
+   * If this serverless instance is warm, return memory cache immediately.
+   * This makes repeat visits much faster.
+   */
+  if (memoryCache && now - memoryCache.cachedAt < MEMORY_CACHE_MS) {
     return NextResponse.json(
       {
-        formUrl: FORM_URL,
-        ...data,
+        ...memoryCache.data,
+        cache: {
+          source: "memory",
+          cachedAt: new Date(memoryCache.cachedAt).toISOString(),
+        },
       },
       {
         status: 200,
         headers: {
-          "Cache-Control": "s-maxage=30, stale-while-revalidate=300",
-        },
-      }
-    );
-  } catch (error) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unknown RTT API route error",
-        updatedAt: new Date().toISOString(),
-        formUrl: FORM_URL,
-        players: [],
-        matches: [],
-        weeklyResults: [],
-        payout: null,
-      },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": "s-maxage=15, stale-while-revalidate=120",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=600",
         },
       }
     );
   }
+
+  try {
+    /**
+     * Important:
+     * Do NOT append Date.now() here.
+     * That cache-busts Apps Script and Vercel fetch caching.
+     */
+    const response = await fetch(APPS_SCRIPT_URL, {
+      next: { revalidate: 60 },
+    });
+
+    if (!response.ok) {
+      const fallback = buildEmptyResponse(
+        `Apps Script failed with HTTP ${response.status}`
+      );
+
+      return NextResponse.json(fallback, {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, s-maxage=15, stale-while-revalidate=120",
+        },
+      });
+    }
+
+    const text = await response.text();
+
+    let appsScriptData: Record<string, unknown>;
+
+    try {
+      appsScriptData = JSON.parse(text) as Record<string, unknown>;
+    } catch {
+      const fallback = buildEmptyResponse("Apps Script returned non-JSON response.");
+
+      return NextResponse.json(
+        {
+          ...fallback,
+          raw: text,
+        },
+        {
+          status: 200,
+          headers: {
+            "Cache-Control": "public, s-maxage=15, stale-while-revalidate=120",
+          },
+        }
+      );
+    }
+
+    const normalizedData: Record<string, unknown> = {
+      formUrl: FORM_URL,
+      ...appsScriptData,
+      fetchedAt: new Date().toISOString(),
+    };
+
+    memoryCache = {
+      data: normalizedData,
+      cachedAt: now,
+    };
+
+    return NextResponse.json(
+      {
+        ...normalizedData,
+        cache: {
+          source: "apps-script",
+          cachedAt: new Date(now).toISOString(),
+        },
+      },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=600",
+        },
+      }
+    );
+  } catch (error) {
+    /**
+     * If Apps Script fails but we have stale memory cache, serve that.
+     */
+    if (memoryCache) {
+      return NextResponse.json(
+        {
+          ...memoryCache.data,
+          cache: {
+            source: "stale-memory",
+            cachedAt: new Date(memoryCache.cachedAt).toISOString(),
+          },
+          warning:
+            error instanceof Error
+              ? error.message
+              : "Apps Script failed; served stale cache.",
+        },
+        {
+          status: 200,
+          headers: {
+            "Cache-Control": "public, s-maxage=30, stale-while-revalidate=300",
+          },
+        }
+      );
+    }
+
+    return NextResponse.json(
+      buildEmptyResponse(
+        error instanceof Error ? error.message : "Unknown RTT API route error"
+      ),
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, s-maxage=15, stale-while-revalidate=120",
+        },
+      }
+    );
+  }
+}
+
+function buildEmptyResponse(error: string) {
+  return {
+    ok: false,
+    error,
+    updatedAt: new Date().toISOString(),
+    formUrl: FORM_URL,
+    players: [],
+    matches: [],
+    weeklyResults: [],
+    payout: null,
+  };
 }

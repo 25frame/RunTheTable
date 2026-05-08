@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export default async function StandingsPage() {
   const data = await getRTTData();
@@ -24,48 +23,54 @@ export default async function StandingsPage() {
         </p>
 
         <div className="mt-8 grid gap-4">
-          {players.map((p) => (
-            <Link
-              key={p.id}
-              href={`/players/${p.id}`}
-              className="rounded-[2rem] border border-white/10 bg-white/5 p-5"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-rtt-red">
-                    Rank #{p.rank}
-                  </p>
+          {players.length ? (
+            players.map((p) => (
+              <Link
+                key={p.id}
+                href={`/players/${p.id}`}
+                className="rounded-[2rem] border border-white/10 bg-white/5 p-5 transition hover:border-rtt-red hover:bg-white/10"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.2em] text-rtt-red">
+                      Rank #{p.rank}
+                    </p>
 
-                  <h2 className="mt-2 text-3xl font-black uppercase">
-                    {p.handle || p.name}
-                  </h2>
+                    <h2 className="mt-2 text-3xl font-black uppercase">
+                      {p.handle || p.name}
+                    </h2>
 
-                  <p className="mt-1 text-sm font-bold text-white/45">
-                    {p.skill}
-                  </p>
+                    <p className="mt-1 text-sm font-bold text-white/45">
+                      {p.skill}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-4xl font-black text-rtt-red">
+                      {p.points}
+                    </p>
+                    <p className="text-xs font-black uppercase text-white/40">
+                      pts
+                    </p>
+                  </div>
                 </div>
 
-                <div className="text-right">
-                  <p className="text-4xl font-black text-rtt-red">
-                    {p.points}
-                  </p>
-                  <p className="text-xs font-black uppercase text-white/40">
-                    pts
-                  </p>
+                <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+                  <Stat label="Wins" value={p.wins} />
+                  <Stat label="Losses" value={p.losses} />
+                  <Stat label="Diff" value={p.pointDiff} />
                 </div>
-              </div>
-
-              <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-                <Stat label="Wins" value={p.wins} />
-                <Stat label="Losses" value={p.losses} />
-                <Stat label="Diff" value={p.pointDiff} />
-              </div>
-            </Link>
-          ))}
-
-          {!players.length && (
+              </Link>
+            ))
+          ) : (
             <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 text-white/50">
-              No standings loaded.
+              <p>No standings loaded.</p>
+
+              {data?.error ? (
+                <p className="mt-2 text-xs text-red-300">
+                  Feed error: {data.error}
+                </p>
+              ) : null}
             </div>
           )}
         </div>

@@ -1,5 +1,6 @@
 "use client";
-
+// app/standings/page.tsx
+export const revalidate = 60;
 import { useEffect, useState } from "react";
 import { getRTTData } from "@/lib/googleData";
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 export default async function PlayersPage() {
   const data = await getRTTData();

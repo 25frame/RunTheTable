@@ -110,22 +110,39 @@ type RawRTTData = {
   error?: string;
 };
 
-const RTT_API_URL =
-  process.env.NEXT_PUBLIC_RTT_API_URL ||
-  process.env.RTT_INTERNAL_API_URL ||
-  "/api/rtt";
-
 const RTT_FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform";
+
+/**
+ * Server-side data source.
+ *
+ * Preferred:
+ * - RTT_INTERNAL_API_URL=https://run-the-table.vercel.app/api/rtt
+ *
+ * Fallback:
+ * - VERCEL_URL is automatically provided by Vercel.
+ * - Local fallback uses /api/rtt.
+ */
+function getRTTApiUrl(): string {
+  if (process.env.RTT_INTERNAL_API_URL) {
+    return process.env.RTT_INTERNAL_API_URL;
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}/api/rtt`;
+  }
+
+  return "/api/rtt";
+}
 
 export async function getRTTData(): Promise<RTTData> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const res = await fetch(RTT_API_URL, {
+    const res = await fetch(getRTTApiUrl(), {
       signal: controller.signal,
-      next: { revalidate: 30 },
+      next: { revalidate: 60 },
     });
 
     clearTimeout(timeout);
@@ -134,15 +151,7 @@ export async function getRTTData(): Promise<RTTData> {
       throw new Error(`RTT API failed with HTTP ${res.status}`);
     }
 
-    const text = await res.text();
-
-    let raw: RawRTTData;
-
-    try {
-      raw = JSON.parse(text) as RawRTTData;
-    } catch {
-      throw new Error("RTT API did not return valid JSON.");
-    }
+    const raw = (await res.json()) as RawRTTData;
 
     if (raw.ok === false || raw.success === false) {
       throw new Error(raw.error || "RTT API returned ok:false.");
@@ -155,20 +164,14 @@ export async function getRTTData(): Promise<RTTData> {
       raw.data?.livePlayers ||
       [];
 
-    const rawMatches =
-      raw.matches ||
-      raw.data?.matches ||
-      [];
+    const rawMatches = raw.matches || raw.data?.matches || [];
 
     const rawWeeklyResults =
       raw.weeklyResults ||
       raw.data?.weeklyResults ||
       [];
 
-    const rawPayout =
-      raw.payout ||
-      raw.data?.payout ||
-      null;
+    const rawPayout = raw.payout || raw.data?.payout || null;
 
     return {
       ok: true,
@@ -257,19 +260,17 @@ function normalizeMatches(matches: RawRTTMatch[]): RTTMatch[] {
 }
 
 function normalizeWeeklyResults(results: RawRTTWeeklyResult[]): RTTWeeklyResult[] {
-  return results.map((result): RTTWeeklyResult => {
-    return {
-      week: toNumber(result.week, 1),
-      winner: clean(result.winner) || "TBD",
-      players: toNumber(result.players, 0),
-      collected: toNumber(result.collected, 0),
-      organizerCut: toNumber(result.organizerCut, 0),
-      prizePool: toNumber(result.prizePool, 0),
-      first: toNumber(result.first, 0),
-      second: toNumber(result.second, 0),
-      third: toNumber(result.third, 0),
-    };
-  });
+  return results.map((result): RTTWeeklyResult => ({
+    week: toNumber(result.week, 1),
+    winner: clean(result.winner) || "TBD",
+    players: toNumber(result.players, 0),
+    collected: toNumber(result.collected, 0),
+    organizerCut: toNumber(result.organizerCut, 0),
+    prizePool: toNumber(result.prizePool, 0),
+    first: toNumber(result.first, 0),
+    second: toNumber(result.second, 0),
+    third: toNumber(result.third, 0),
+  }));
 }
 
 function normalizePayout(payout: RawRTTPayout | null): RTTPayout | null {
