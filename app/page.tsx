@@ -12,11 +12,126 @@ export default async function HomePage() {
   return (
     <main className="rtt-shell text-white">
       <section className="rtt-max">
+        <style>
+          {`
+            @keyframes rttSlamIn {
+              0% {
+                opacity: 0;
+                transform: translateX(-52px) skewX(-14deg) scale(0.96);
+                filter: blur(6px);
+              }
+              58% {
+                opacity: 1;
+                transform: translateX(8px) skewX(-14deg) scale(1.02);
+                filter: blur(0);
+              }
+              100% {
+                opacity: 1;
+                transform: translateX(0) skewX(-14deg) scale(1);
+                filter: blur(0);
+              }
+            }
+
+            @keyframes rttSlash {
+              0% {
+                transform: translateX(-120%) scaleX(0.2);
+                opacity: 0;
+              }
+              35% {
+                opacity: 1;
+              }
+              100% {
+                transform: translateX(0) scaleX(1);
+                opacity: 1;
+              }
+            }
+
+            @keyframes rttFadeUp {
+              0% {
+                opacity: 0;
+                transform: translateY(18px);
+              }
+              100% {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+
+            @keyframes rttPulse {
+              0%, 100% {
+                box-shadow: 0 0 28px rgba(255, 0, 0, 0.28);
+                transform: scale(1);
+              }
+              50% {
+                box-shadow: 0 0 46px rgba(255, 0, 0, 0.46);
+                transform: scale(1.035);
+              }
+            }
+
+            .rtt-animate-r {
+              animation: rttPulse 2.4s ease-in-out infinite;
+            }
+
+            .rtt-hero-word {
+              display: block;
+              opacity: 0;
+              animation: rttSlamIn 680ms cubic-bezier(.2,.9,.2,1) forwards;
+            }
+
+            .rtt-hero-word:nth-child(1) {
+              animation-delay: 80ms;
+            }
+
+            .rtt-hero-word:nth-child(2) {
+              animation-delay: 220ms;
+            }
+
+            .rtt-hero-word:nth-child(3) {
+              animation-delay: 360ms;
+            }
+
+            .rtt-slash {
+              transform-origin: left center;
+              animation: rttSlash 760ms cubic-bezier(.2,.9,.2,1) 520ms forwards;
+              opacity: 0;
+            }
+
+            .rtt-fade-1 {
+              opacity: 0;
+              animation: rttFadeUp 520ms ease-out 680ms forwards;
+            }
+
+            .rtt-fade-2 {
+              opacity: 0;
+              animation: rttFadeUp 520ms ease-out 820ms forwards;
+            }
+
+            .rtt-fade-3 {
+              opacity: 0;
+              animation: rttFadeUp 520ms ease-out 960ms forwards;
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+              .rtt-animate-r,
+              .rtt-hero-word,
+              .rtt-slash,
+              .rtt-fade-1,
+              .rtt-fade-2,
+              .rtt-fade-3 {
+                animation: none;
+                opacity: 1;
+                transform: none;
+                filter: none;
+              }
+            }
+          `}
+        </style>
+
         {/* HERO */}
         <section className="pt-8">
           <div className="mb-10 flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-[1.35rem] bg-rtt-red shadow-[0_0_28px_rgba(255,0,0,0.28)]">
+              <div className="rtt-animate-r grid h-16 w-16 shrink-0 place-items-center rounded-[1.35rem] bg-rtt-red">
                 <span className="-skew-x-12 text-3xl font-black italic text-white">
                   R
                 </span>
@@ -37,31 +152,37 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-rtt-red">
+          <p className="rtt-fade-1 text-xs font-black uppercase tracking-[0.28em] text-rtt-red">
             RTT NYC
           </p>
 
-          <h1 className="mt-4 text-[clamp(5rem,17vw,15rem)] font-black italic uppercase leading-[0.78] tracking-[-0.1em]">
-            RTT
-          </h1>
+          <div className="relative mt-4 overflow-hidden">
+            <h1 className="text-[clamp(4.8rem,15vw,13rem)] font-black italic uppercase leading-[0.78] tracking-[-0.1em]">
+              <span className="rtt-hero-word">Run</span>
+              <span className="rtt-hero-word">The</span>
+              <span className="rtt-hero-word">Table</span>
+            </h1>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="rtt-slash pointer-events-none absolute left-0 top-[49%] h-3 w-[78%] -rotate-3 bg-rtt-red shadow-[0_0_30px_rgba(255,0,0,0.38)]" />
+          </div>
+
+          <div className="rtt-fade-2 mt-6 flex flex-wrap items-center gap-3">
             <p className="text-4xl font-black uppercase tracking-[-0.06em]">
-              NYC
+              RTT NYC
             </p>
 
             <div className="h-[3px] w-16 bg-rtt-red" />
 
             <p className="text-sm font-black uppercase tracking-[0.18em] text-white/45">
-              Run The Table
+              Street Table Tennis
             </p>
           </div>
 
-          <p className="mt-8 max-w-2xl text-xl font-black uppercase leading-8 tracking-[0.02em] text-white/60">
+          <p className="rtt-fade-2 mt-8 max-w-2xl text-xl font-black uppercase leading-8 tracking-[0.02em] text-white/60">
             Scan in. Get ranked. Battle live. Climb the board.
           </p>
 
-          <div className="mt-8 grid gap-3">
+          <div className="rtt-fade-3 mt-8 grid gap-3">
             <Link href="/park" className="rtt-cta">
               Get Ranked
             </Link>
@@ -79,7 +200,7 @@ export default async function HomePage() {
         </section>
 
         {/* STATUS */}
-        <section className="mt-10 grid gap-3 md:grid-cols-3">
+        <section className="rtt-fade-3 mt-10 grid gap-3 md:grid-cols-3">
           <StatBox label="Players" value={players.length} />
           <StatBox label="Battles" value={data?.matches?.length || 0} />
           <StatBox
