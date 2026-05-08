@@ -7,12 +7,6 @@ const APPS_SCRIPT_URL =
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform";
 
-/**
- * API route cache behavior:
- * - Allows Vercel/Next to cache the route.
- * - Keeps data reasonably fresh.
- * - Avoids hitting Google Apps Script on every page load.
- */
 export const revalidate = 60;
 
 type CachedRTTResponse = {
@@ -27,11 +21,6 @@ const MEMORY_CACHE_MS = 60 * 1000;
 export async function GET() {
   const now = Date.now();
 
-  /**
-   * Fast path:
-   * If this serverless instance is warm, return memory cache immediately.
-   * This makes repeat visits much faster.
-   */
   if (memoryCache && now - memoryCache.cachedAt < MEMORY_CACHE_MS) {
     return NextResponse.json(
       {
@@ -51,11 +40,6 @@ export async function GET() {
   }
 
   try {
-    /**
-     * Important:
-     * Do NOT append Date.now() here.
-     * That cache-busts Apps Script and Vercel fetch caching.
-     */
     const response = await fetch(APPS_SCRIPT_URL, {
       next: { revalidate: 60 },
     });
@@ -80,7 +64,9 @@ export async function GET() {
     try {
       appsScriptData = JSON.parse(text) as Record<string, unknown>;
     } catch {
-      const fallback = buildEmptyResponse("Apps Script returned non-JSON response.");
+      const fallback = buildEmptyResponse(
+        "Apps Script returned non-JSON response."
+      );
 
       return NextResponse.json(
         {
@@ -123,9 +109,6 @@ export async function GET() {
       }
     );
   } catch (error) {
-    /**
-     * If Apps Script fails but we have stale memory cache, serve that.
-     */
     if (memoryCache) {
       return NextResponse.json(
         {

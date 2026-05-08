@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function StandingsPage() {
   const data = await getRTTData();

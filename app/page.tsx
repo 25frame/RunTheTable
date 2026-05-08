@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const data = await getRTTData();
@@ -67,13 +67,11 @@ export default async function HomePage() {
               ))
             ) : (
               <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                <p className="text-white/40">No players loaded yet.</p>
-
-                {data?.error ? (
-                  <p className="mt-2 text-xs text-red-300">
-                    Feed error: {data.error}
-                  </p>
-                ) : null}
+                <p className="text-white/40">
+                  {data?.error
+                    ? `Feed error: ${data.error}`
+                    : "No players loaded yet."}
+                </p>
               </div>
             )}
           </div>
