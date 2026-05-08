@@ -84,36 +84,48 @@ type RawRTTMatch = Partial<RTTMatch> & {
   playerBName?: string;
 };
 
-type RawRTTData = Partial<RTTData> & {
+type RawRTTWeeklyResult = Partial<RTTWeeklyResult>;
+
+type RawRTTPayout = Partial<RTTPayout>;
+
+type RawRTTData = {
+  ok?: boolean;
   success?: boolean;
-  livePlayers?: RawRTTPlayer[];
+  updatedAt?: string;
+  formUrl?: string;
   players?: RawRTTPlayer[];
+  livePlayers?: RawRTTPlayer[];
   matches?: RawRTTMatch[];
+  weeklyResults?: RawRTTWeeklyResult[];
+  payout?: RawRTTPayout | null;
   data?: {
     players?: RawRTTPlayer[];
+    livePlayers?: RawRTTPlayer[];
     matches?: RawRTTMatch[];
-    weeklyResults?: RTTWeeklyResult[];
-    payout?: RTTPayout | null;
+    weeklyResults?: RawRTTWeeklyResult[];
+    payout?: RawRTTPayout | null;
     formUrl?: string;
   };
+  debug?: unknown;
+  error?: string;
 };
 
 const RTT_API_URL =
   process.env.NEXT_PUBLIC_RTT_API_URL ||
-  "https://script.google.com/macros/s/AKfycbzPEtTPBALXh_2eb1PaUeXI8DNeT74YW4g05ldRzH049LPAXKAa60oUrz1-pD7hkgZ3/exec";
+  process.env.RTT_INTERNAL_API_URL ||
+  "/api/rtt";
 
 const RTT_FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform";
 
 export async function getRTTData(): Promise<RTTData> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
+  const timeout = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const res = await fetch(`${RTT_API_URL}?ts=${Date.now()}`, {
-      cache: "no-store",
+    const res = await fetch(RTT_API_URL, {
       signal: controller.signal,
-      next: { revalidate: 0 },
+      next: { revalidate: 30 },
     });
 
     clearTimeout(timeout);
@@ -140,6 +152,7 @@ export async function getRTTData(): Promise<RTTData> {
       raw.players ||
       raw.data?.players ||
       raw.livePlayers ||
+      raw.data?.livePlayers ||
       [];
 
     const rawMatches =
@@ -147,12 +160,12 @@ export async function getRTTData(): Promise<RTTData> {
       raw.data?.matches ||
       [];
 
-    const weeklyResults =
+    const rawWeeklyResults =
       raw.weeklyResults ||
       raw.data?.weeklyResults ||
       [];
 
-    const payout =
+    const rawPayout =
       raw.payout ||
       raw.data?.payout ||
       null;
@@ -163,8 +176,8 @@ export async function getRTTData(): Promise<RTTData> {
       formUrl: raw.formUrl || raw.data?.formUrl || RTT_FORM_URL,
       players: normalizePlayers(rawPlayers),
       matches: normalizeMatches(rawMatches),
-      weeklyResults,
-      payout,
+      weeklyResults: normalizeWeeklyResults(rawWeeklyResults),
+      payout: normalizePayout(rawPayout),
       debug: raw.debug || raw,
     };
   } catch (error) {
@@ -220,7 +233,7 @@ function normalizeMatches(matches: RawRTTMatch[]): RTTMatch[] {
   return matches.map((match, index): RTTMatch => {
     const scoreA = toNumber(match.scoreA, 0);
     const scoreB = toNumber(match.scoreB, 0);
-    const verified = Boolean(match.verified);
+    const verified = toBoolean(match.verified);
 
     return {
       row: match.row,
@@ -243,6 +256,39 @@ function normalizeMatches(matches: RawRTTMatch[]): RTTMatch[] {
   });
 }
 
+function normalizeWeeklyResults(results: RawRTTWeeklyResult[]): RTTWeeklyResult[] {
+  return results.map((result): RTTWeeklyResult => {
+    return {
+      week: toNumber(result.week, 1),
+      winner: clean(result.winner) || "TBD",
+      players: toNumber(result.players, 0),
+      collected: toNumber(result.collected, 0),
+      organizerCut: toNumber(result.organizerCut, 0),
+      prizePool: toNumber(result.prizePool, 0),
+      first: toNumber(result.first, 0),
+      second: toNumber(result.second, 0),
+      third: toNumber(result.third, 0),
+    };
+  });
+}
+
+function normalizePayout(payout: RawRTTPayout | null): RTTPayout | null {
+  if (!payout) return null;
+
+  return {
+    eventId: clean(payout.eventId) || "EVT-001",
+    week: toNumber(payout.week, 1),
+    paidPlayers: toNumber(payout.paidPlayers, 0),
+    totalCollected: toNumber(payout.totalCollected, 0),
+    operationsCut: toNumber(payout.operationsCut, 0),
+    prizePool: toNumber(payout.prizePool, 0),
+    firstPlaceName: clean(payout.firstPlaceName) || "TBD",
+    firstPlacePayout: toNumber(payout.firstPlacePayout, 0),
+    secondPlacePayout: toNumber(payout.secondPlacePayout, 0),
+    thirdPlacePayout: toNumber(payout.thirdPlacePayout, 0),
+  };
+}
+
 function clean(value: unknown): string {
   return String(value ?? "").trim();
 }
@@ -250,4 +296,10 @@ function clean(value: unknown): string {
 function toNumber(value: unknown, fallback: number): number {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
+}
+
+function toBoolean(value: unknown): boolean {
+  if (value === true) return true;
+  if (typeof value === "string") return value.toLowerCase() === "true";
+  return false;
 }
