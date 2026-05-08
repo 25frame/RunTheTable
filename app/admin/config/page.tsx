@@ -496,6 +496,20 @@ const CONFIG_FIELDS: ConfigField[] = [
     group: "Places",
     fallback: "Source",
   },
+{
+  key: "places.googleMapsLabel",
+  label: "Google Maps Button Label",
+  group: "Places",
+  fallback: "Find More Tables",
+},
+{
+  key: "places.googleMapsUrl",
+  label: "Google Maps Search URL",
+  group: "Places",
+  fallback:
+    "https://www.google.com/maps/search/Ping+Pong+Table%F0%9F%8F%93/@40.7007572,-74.0276943,13z/data=!3m1!4b1?entry=ttu",
+  multiline: true,
+},
   {
     key: "places.directionsButton",
     label: "Places Directions Button",

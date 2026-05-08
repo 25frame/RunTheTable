@@ -4,6 +4,9 @@ import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
+const DEFAULT_GOOGLE_MAPS_URL =
+  "https://www.google.com/maps/search/Ping+Pong+Table%F0%9F%8F%93/@40.7007572,-74.0276943,13z/data=!3m1!4b1?entry=ttu";
+
 export default async function PlacesPage() {
   const data = await getRTTData();
   const config = data.config;
@@ -11,6 +14,18 @@ export default async function PlacesPage() {
 
   const featured = places.filter((place) => place.featured);
   const regular = places.filter((place) => !place.featured);
+
+  const googleMapsUrl = cfg(
+    config,
+    "places.googleMapsUrl",
+    DEFAULT_GOOGLE_MAPS_URL
+  );
+
+  const googleMapsLabel = cfg(
+    config,
+    "places.googleMapsLabel",
+    "Find More Tables"
+  );
 
   return (
     <main className="rtt-page">
@@ -25,6 +40,17 @@ export default async function PlacesPage() {
             "Verified and known table tennis spots around NYC."
           )}
         />
+
+        <section className="grid gap-3">
+          <a
+            href={googleMapsUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="rtt-secondary text-center"
+          >
+            {googleMapsLabel}
+          </a>
+        </section>
 
         {featured.length ? (
           <section className="rtt-section">
