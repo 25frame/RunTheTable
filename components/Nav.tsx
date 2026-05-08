@@ -1,22 +1,34 @@
 "use client";
 
+import { getCurrentUser } from "@/lib/auth";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export function Nav() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Admin pages use AdminShell. Do not show public header/bottom nav there.
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const user = getCurrentUser();
+    setIsAdmin(user?.role === "admin");
+  }, [pathname]);
+
+  // Admin pages use AdminShell, so do not show the public header or bottom nav there.
   if (pathname.startsWith("/admin")) {
     return null;
   }
+
+  const loginHref = isAdmin ? "/admin/dashboard" : "/login";
+  const loginLabel = isAdmin ? "ADMIN" : "LOGIN";
 
   const items = [
     { label: "HOME", href: "/" },
     { label: "JOIN", href: "/join" },
     { label: "LIVE", href: "/live" },
     { label: "BOARD", href: "/standings" },
-    { label: "CREW", href: "/players" },
+    { label: loginLabel, href: loginHref },
   ];
 
   return (
@@ -44,20 +56,33 @@ export function Nav() {
             </div>
           </button>
 
-          <button
-            type="button"
-            onClick={() => router.push("/join")}
-            className="shrink-0 rounded-full bg-rtt-red px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] md:px-5 md:py-3 md:text-xs"
-          >
-            Join
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => router.push(loginHref)}
+              className="rounded-full border border-white/10 bg-white/[0.055] px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/70 md:px-5 md:py-3 md:text-xs"
+            >
+              {loginLabel}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => router.push("/join")}
+              className="rounded-full bg-rtt-red px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white md:px-5 md:py-3 md:text-xs"
+            >
+              Join
+            </button>
+          </div>
         </div>
       </header>
 
       <nav className="fixed bottom-3 left-3 right-3 z-50 md:bottom-4 md:left-4 md:right-4">
         <div className="mx-auto grid max-w-xl grid-cols-5 gap-1 rounded-[1.6rem] border border-white/10 bg-black/90 p-1.5 shadow-[0_0_30px_rgba(0,0,0,0.55)] backdrop-blur-xl md:gap-2 md:rounded-[2rem] md:p-2">
           {items.map((item) => {
-            const active = pathname === item.href;
+            const active =
+              pathname === item.href ||
+              (item.href === "/admin/dashboard" &&
+                pathname.startsWith("/admin"));
 
             return (
               <button
