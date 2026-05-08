@@ -32,6 +32,7 @@ export default function AdminPlayersPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [deletingPlayerId, setDeletingPlayerId] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
@@ -94,6 +95,8 @@ export default function AdminPlayersPage() {
   }
 
   function startEdit(player: RTTPlayer) {
+    if (busy) return;
+
     setEditing({
       playerId: player.id,
       displayName: player.name,
@@ -107,6 +110,8 @@ export default function AdminPlayersPage() {
   }
 
   function cancelEdit() {
+    if (busy) return;
+
     setEditing(null);
     setError("");
     setMessage("");
@@ -126,7 +131,7 @@ export default function AdminPlayersPage() {
 
     setBusy(true);
     setError("");
-    setMessage("");
+    setMessage("Saving player...");
 
     try {
       const result = await updatePlayerAdmin({
@@ -142,12 +147,15 @@ export default function AdminPlayersPage() {
       await loadPlayers();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to update player.");
+      setMessage("");
     } finally {
       setBusy(false);
     }
   }
 
   async function deleteSelectedPlayer(player: RTTPlayer) {
+    if (busy) return;
+
     const confirmed = window.confirm(
       [
         `Delete player "${player.handle || player.name}"?`,
@@ -163,8 +171,9 @@ export default function AdminPlayersPage() {
     if (!confirmed) return;
 
     setBusy(true);
+    setDeletingPlayerId(player.id);
     setError("");
-    setMessage("");
+    setMessage(`Deleting ${player.handle || player.name}...`);
 
     try {
       const result = await deletePlayer({ playerId: player.id });
@@ -190,15 +199,19 @@ export default function AdminPlayersPage() {
       await loadPlayers();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to delete player.");
+      setMessage("");
     } finally {
       setBusy(false);
+      setDeletingPlayerId("");
     }
   }
 
   async function resyncSystem() {
+    if (busy) return;
+
     setBusy(true);
     setError("");
-    setMessage("");
+    setMessage("Resyncing roster, standings, and public feed...");
 
     try {
       const result = await repairRTTSiteData();
@@ -207,6 +220,7 @@ export default function AdminPlayersPage() {
       await loadPlayers();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to resync system.");
+      setMessage("");
     } finally {
       setBusy(false);
     }
@@ -239,7 +253,7 @@ export default function AdminPlayersPage() {
             disabled={busy}
             className="rounded-full bg-rtt-red px-4 py-3 text-[10px] font-black uppercase tracking-[0.16em] text-white disabled:opacity-50"
           >
-            Resync
+            {busy && !deletingPlayerId ? "Working..." : "Resync"}
           </button>
         </div>
       </div>
@@ -264,9 +278,19 @@ export default function AdminPlayersPage() {
         </div>
       ) : null}
 
+      {deletingPlayerId ? (
+        <div className="mt-5 rounded-[1.5rem] border border-rtt-red/40 bg-rtt-red/15 p-4 text-sm font-bold text-red-100">
+          Deleting player, updating registrations, cancelling open matches, and
+          recalculating standings. Please wait...
+        </div>
+      ) : null}
+
       <section className="mt-6 grid grid-cols-3 gap-2">
         <MiniStat label="Active Players" value={players.length} />
-        <MiniStat label="Top Player" value={topPlayer?.handle || topPlayer?.name || "Open"} />
+        <MiniStat
+          label="Top Player"
+          value={topPlayer?.handle || topPlayer?.name || "Open"}
+        />
         <MiniStat label="Top Pts" value={topPlayer?.points ?? 0} />
       </section>
 
@@ -298,6 +322,7 @@ export default function AdminPlayersPage() {
                   }
                   className={inputClass}
                   required
+                  disabled={busy}
                 />
               </Field>
 
@@ -312,6 +337,7 @@ export default function AdminPlayersPage() {
                     )
                   }
                   className={inputClass}
+                  disabled={busy}
                 >
                   <option value="Unranked">Unranked</option>
                   <option value="Beginner">Beginner</option>
@@ -336,6 +362,7 @@ export default function AdminPlayersPage() {
                   }
                   placeholder="@handle"
                   className={inputClass}
+                  disabled={busy}
                 />
               </Field>
 
@@ -350,6 +377,7 @@ export default function AdminPlayersPage() {
                     )
                   }
                   className={inputClass}
+                  disabled={busy}
                 >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
@@ -382,6 +410,7 @@ export default function AdminPlayersPage() {
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Name, handle, ID, skill..."
                   className={inputClass}
+                  disabled={busy}
                 />
               </Field>
 
@@ -433,6 +462,7 @@ export default function AdminPlayersPage() {
                   key={player.id}
                   player={player}
                   disabled={busy}
+                  deleting={deletingPlayerId === player.id}
                   onEdit={() => startEdit(player)}
                   onDelete={() => deleteSelectedPlayer(player)}
                 />
@@ -470,18 +500,26 @@ function Field({
 function PlayerAdminCard({
   player,
   disabled,
+  deleting,
   onEdit,
   onDelete,
 }: {
   player: RTTPlayer;
   disabled: boolean;
+  deleting: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const hasPlayed = player.wins + player.losses > 0;
 
   return (
-    <article className="rounded-2xl border border-white/10 bg-black/45 p-4">
+    <article
+      className={
+        deleting
+          ? "rounded-2xl border border-rtt-red/50 bg-rtt-red/10 p-4"
+          : "rounded-2xl border border-white/10 bg-black/45 p-4"
+      }
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-rtt-red">
@@ -497,7 +535,11 @@ function PlayerAdminCard({
           </p>
 
           <p className="mt-2 text-[10px] font-black uppercase tracking-[0.14em] text-white/30">
-            {hasPlayed ? "Has match history" : "No verified match history"}
+            {deleting
+              ? "Delete in progress"
+              : hasPlayed
+                ? "Has match history"
+                : "No verified match history"}
           </p>
         </div>
 
@@ -531,7 +573,7 @@ function PlayerAdminCard({
           disabled={disabled}
           className="rounded-full border border-red-500/30 bg-red-950/30 px-3 py-2.5 text-[9px] font-black uppercase tracking-[0.14em] text-red-200 disabled:opacity-50"
         >
-          Delete
+          {deleting ? "Deleting..." : "Delete"}
         </button>
       </div>
     </article>
