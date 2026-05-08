@@ -6,6 +6,11 @@ export function Nav() {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Admin pages use AdminShell. Do not show public header/bottom nav there.
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
   const items = [
     { label: "HOME", href: "/" },
     { label: "JOIN", href: "/join" },
