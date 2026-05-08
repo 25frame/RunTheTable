@@ -1,6 +1,8 @@
 "use client";
 
 import { getCurrentUser } from "@/lib/auth";
+import { cfg } from "@/lib/siteConfig";
+import type { RTTConfig, RTTData } from "@/lib/googleData";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -9,11 +11,32 @@ export function Nav() {
   const pathname = usePathname();
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [config, setConfig] = useState<RTTConfig>({});
 
   useEffect(() => {
     const user = getCurrentUser();
     setIsAdmin(user?.role === "admin");
   }, [pathname]);
+
+  useEffect(() => {
+    loadConfig();
+  }, []);
+
+  async function loadConfig() {
+    try {
+      const response = await fetch("/api/rtt", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!response.ok) return;
+
+      const data = (await response.json()) as RTTData;
+      setConfig(data.config || {});
+    } catch {
+      setConfig({});
+    }
+  }
 
   // Admin pages use AdminShell, so do not show the public header or bottom nav there.
   if (pathname.startsWith("/admin")) {
@@ -21,13 +44,15 @@ export function Nav() {
   }
 
   const loginHref = isAdmin ? "/admin/dashboard" : "/login";
-  const loginLabel = isAdmin ? "ADMIN" : "LOGIN";
+  const loginLabel = isAdmin
+    ? cfg(config, "nav.admin", "ADMIN")
+    : cfg(config, "nav.login", "LOGIN");
 
   const items = [
-    { label: "HOME", href: "/" },
-    { label: "JOIN", href: "/join" },
-    { label: "LIVE", href: "/live" },
-    { label: "BOARD", href: "/standings" },
+    { label: cfg(config, "nav.home", "HOME"), href: "/" },
+    { label: cfg(config, "nav.join", "JOIN"), href: "/join" },
+    { label: cfg(config, "nav.live", "LIVE"), href: "/live" },
+    { label: cfg(config, "nav.board", "BOARD"), href: "/standings" },
     { label: loginLabel, href: loginHref },
   ];
 
@@ -50,7 +75,7 @@ export function Nav() {
                 <span className="h-5 w-[2px] bg-white/20" />
 
                 <span className="truncate text-[1.15rem] font-black italic uppercase leading-none tracking-[-0.03em] md:text-2xl">
-                  RTT NYC
+                  {cfg(config, "site.shortName", "RTT NYC")}
                 </span>
               </div>
             </div>
@@ -70,7 +95,7 @@ export function Nav() {
               onClick={() => router.push("/join")}
               className="rounded-full bg-rtt-red px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white md:px-5 md:py-3 md:text-xs"
             >
-              Join
+              {cfg(config, "nav.joinButton", "Join")}
             </button>
           </div>
         </div>

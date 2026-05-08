@@ -1,20 +1,26 @@
 import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
+import { cfg } from "@/lib/siteConfig";
 import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
 export default async function StandingsPage() {
   const data = await getRTTData();
+  const config = data.config;
   const players = data?.players || [];
 
   return (
     <main className="rtt-page">
       <section className="rtt-page-inner">
         <PageHero
-          kicker="Board"
-          title="The Board"
-          subtitle="Rankings update after verified battles."
+          kicker={cfg(config, "standings.kicker", "Board")}
+          title={cfg(config, "standings.title", "The Board")}
+          subtitle={cfg(
+            config,
+            "standings.subtitle",
+            "Rankings update after verified battles."
+          )}
         />
 
         <section className="grid grid-cols-3 gap-2">
@@ -84,7 +90,10 @@ export default async function StandingsPage() {
               );
             })
           ) : (
-            <EmptyState title="No standings loaded." error={data?.error} />
+            <EmptyState
+              title={cfg(config, "standings.empty", "No standings loaded.")}
+              error={data?.error}
+            />
           )}
         </section>
       </section>

@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 const adminLinks = [
   ["/admin/dashboard", "Dashboard"],
   ["/admin/qr", "QR"],
+  ["/admin/config", "Config"],
   ["/admin/control", "Control"],
   ["/admin/matches", "Scoring"],
   ["/admin/players", "Players"],
@@ -54,7 +55,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               clearSession();
               router.push("/login");
             }}
-            className="shrink-0 rounded-full bg-rtt-red px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] md:px-5 md:py-3 md:text-xs"
+            className="shrink-0 rounded-full bg-rtt-red px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white md:px-5 md:py-3 md:text-xs"
           >
             Logout
           </button>
@@ -75,7 +76,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                     className={
                       active
                         ? "rounded-full bg-rtt-red px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.14em] text-white"
-                        : "rounded-full border border-white/10 bg-white/[0.045] px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/55"
+                        : "rounded-full border border-white/10 bg-white/[0.045] px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/55 transition hover:text-white"
                     }
                   >
                     {label}

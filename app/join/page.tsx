@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase, SUPABASE_PHOTO_BUCKET } from "@/lib/supabaseClient";
+import { cfg } from "@/lib/siteConfig";
+import type { RTTConfig, RTTData } from "@/lib/googleData";
 
 type JoinPayload = {
   name: string;
@@ -25,10 +27,37 @@ const inputClass =
   "w-full rounded-2xl border border-white/10 bg-black/70 px-5 py-4 text-white outline-none placeholder:text-white/30 focus:border-rtt-red";
 
 export default function JoinPage() {
+  const [config, setConfig] = useState<RTTConfig>({});
+  const [loadingConfig, setLoadingConfig] = useState(true);
+
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [playerId, setPlayerId] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadConfig();
+  }, []);
+
+  async function loadConfig() {
+    setLoadingConfig(true);
+
+    try {
+      const response = await fetch("/api/rtt", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!response.ok) return;
+
+      const data = (await response.json()) as RTTData;
+      setConfig(data.config || {});
+    } catch {
+      setConfig({});
+    } finally {
+      setLoadingConfig(false);
+    }
+  }
 
   async function uploadPhoto(file: File): Promise<string> {
     const ext = file.name.split(".").pop() || "jpg";
@@ -112,7 +141,9 @@ export default function JoinPage() {
       const text = await response.text();
 
       if (!text || !text.trim()) {
-        throw new Error(`Empty response from /api/rtt. HTTP status: ${response.status}`);
+        throw new Error(
+          `Empty response from /api/rtt. HTTP status: ${response.status}`
+        );
       }
 
       let data: JoinResponse;
@@ -120,7 +151,9 @@ export default function JoinPage() {
       try {
         data = JSON.parse(text) as JoinResponse;
       } catch {
-        throw new Error(`Non-JSON response from /api/rtt: ${text.slice(0, 300)}`);
+        throw new Error(
+          `Non-JSON response from /api/rtt: ${text.slice(0, 300)}`
+        );
       }
 
       if (!response.ok || !data.ok) {
@@ -141,15 +174,26 @@ export default function JoinPage() {
       <main className="rtt-page">
         <section className="rtt-page-inner">
           <section className="rtt-hero">
-            <p className="rtt-hero-kicker">You’re In</p>
+            <p className="rtt-hero-kicker">
+              {cfg(config, "join.successKicker", "You’re In")}
+            </p>
 
             <h1 className="rtt-hero-title">
-              <span className="block">Welcome</span>
-              <span className="block">To RTT</span>
+              {splitTitle(
+                cfg(config, "join.successHeroTitle", "Welcome To RTT")
+              ).map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
             </h1>
 
             <p className="rtt-hero-subtitle">
-              You are on the board. Admin can now assign you to a battle.
+              {cfg(
+                config,
+                "join.successHeroSubtitle",
+                "You are on the board. Admin can now assign you to a battle."
+              )}
             </p>
           </section>
 
@@ -157,8 +201,16 @@ export default function JoinPage() {
             <p className="rtt-mini-kicker">Player Added</p>
 
             <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.05em]">
-              Added to the board.
+              {cfg(config, "join.successTitle", "Added to the board.")}
             </h2>
+
+            <p className="mt-3 text-sm font-bold leading-6 text-white/55">
+              {cfg(
+                config,
+                "join.successSubtitle",
+                "Admin can now assign you to a battle."
+              )}
+            </p>
 
             {playerId ? (
               <p className="mt-3 text-sm font-black uppercase tracking-[0.12em] text-white/50">
@@ -169,11 +221,11 @@ export default function JoinPage() {
 
           <section className="mt-5 grid gap-3">
             <Link href="/live" className="rtt-cta">
-              Watch Live
+              {cfg(config, "join.watchLiveButton", "Watch Live")}
             </Link>
 
             <Link href="/standings" className="rtt-secondary">
-              View Board
+              {cfg(config, "join.viewBoardButton", "View Board")}
             </Link>
           </section>
         </section>
@@ -185,15 +237,26 @@ export default function JoinPage() {
     <main className="rtt-page">
       <section className="rtt-page-inner">
         <section className="rtt-hero">
-          <p className="rtt-hero-kicker">Join</p>
+          <p className="rtt-hero-kicker">
+            {cfg(config, "join.kicker", "Join")}
+          </p>
 
           <h1 className="rtt-hero-title">
-            <span className="block">Get On</span>
-            <span className="block">The Board</span>
+            {splitTitle(cfg(config, "join.title", "Get On The Board")).map(
+              (line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              )
+            )}
           </h1>
 
           <p className="rtt-hero-subtitle">
-            Enter your info, upload a player photo, and get ranked.
+            {cfg(
+              config,
+              "join.subtitle",
+              "Enter your info, upload a player photo, and get ranked."
+            )}
           </p>
         </section>
 
@@ -297,13 +360,40 @@ export default function JoinPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || loadingConfig}
             className="rtt-cta disabled:opacity-50"
           >
-            {loading ? "Joining..." : "Join RTT"}
+            {loading
+              ? "Joining..."
+              : cfg(config, "join.submitButton", "Join RTT")}
           </button>
         </form>
       </section>
     </main>
   );
+}
+
+function splitTitle(title: string): string[] {
+  const cleanTitle = title.trim();
+
+  if (!cleanTitle) return [""];
+
+  if (cleanTitle.toLowerCase() === "get on the board") {
+    return ["Get On", "The Board"];
+  }
+
+  if (cleanTitle.toLowerCase() === "welcome to rtt") {
+    return ["Welcome", "To RTT"];
+  }
+
+  const words = cleanTitle.split(/\s+/);
+
+  if (words.length <= 2) return [cleanTitle];
+
+  const midpoint = Math.ceil(words.length / 2);
+
+  return [
+    words.slice(0, midpoint).join(" "),
+    words.slice(midpoint).join(" "),
+  ];
 }

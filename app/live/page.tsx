@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
+import { cfg } from "@/lib/siteConfig";
 import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
 export default async function LivePage() {
   const data = await getRTTData();
+  const config = data.config;
   const matches = data?.matches || [];
 
   const liveMatch =
@@ -18,9 +20,13 @@ export default async function LivePage() {
     <main className="rtt-page">
       <section className="rtt-page-inner">
         <PageHero
-          kicker="Live Match"
-          title="Live Battle"
-          subtitle="Current action and recent receipts from the table."
+          kicker={cfg(config, "live.kicker", "Live")}
+          title={cfg(config, "live.title", "Watch Live")}
+          subtitle={cfg(
+            config,
+            "live.subtitle",
+            "Follow the current table and recent battles."
+          )}
         />
 
         {liveMatch ? (
@@ -71,29 +77,37 @@ export default async function LivePage() {
           </div>
 
           <div className="rtt-list">
-            {recent.map((m) => (
-              <Link
-                key={`${m.matchId}-${m.row}`}
-                href="/results"
-                className="rtt-mobile-card"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="truncate text-xl font-black uppercase tracking-[-0.04em]">
-                      {m.playerA} vs {m.playerB}
-                    </p>
+            {recent.length ? (
+              recent.map((m) => (
+                <Link
+                  key={`${m.matchId}-${m.row}`}
+                  href="/results"
+                  className="rtt-mobile-card"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="truncate text-xl font-black uppercase tracking-[-0.04em]">
+                        {m.playerA} vs {m.playerB}
+                      </p>
 
-                    <p className="mt-1 rtt-muted-line">
-                      {m.type || "Battle"} / {m.status || "Scheduled"}
+                      <p className="mt-1 rtt-muted-line">
+                        {m.type || "Battle"} / {m.status || "Scheduled"}
+                      </p>
+                    </div>
+
+                    <p className="shrink-0 text-2xl font-black text-rtt-red">
+                      {m.score}
                     </p>
                   </div>
-
-                  <p className="shrink-0 text-2xl font-black text-rtt-red">
-                    {m.score}
-                  </p>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))
+            ) : (
+              <div className="rtt-mobile-card">
+                <p className="font-black uppercase text-white/60">
+                  No recent matches yet.
+                </p>
+              </div>
+            )}
           </div>
         </section>
       </section>

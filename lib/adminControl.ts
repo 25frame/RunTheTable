@@ -1,6 +1,6 @@
 import { authedPost } from "@/lib/auth";
 import type { RTTUser } from "@/lib/auth";
-import type { RTTData } from "@/lib/googleData";
+import type { RTTConfig, RTTData } from "@/lib/googleData";
 
 export type AdminHealthTab = {
   name: string;
@@ -20,6 +20,7 @@ export type AdminHealth = {
     standingsSheetRows: number;
     matchesSheetRows: number;
     registrationsSheetRows: number;
+    siteConfigRows?: number;
     publicPlayersReturned: number;
   };
   error?: string;
@@ -98,6 +99,14 @@ export type ListUsersResult = {
   error?: string;
 };
 
+export type SiteConfigUpdatePayload = {
+  updates: Record<string, string>;
+};
+
+export type SiteConfigUpdateResult = AdminActionResult & {
+  config?: RTTConfig;
+};
+
 export async function adminHealthCheck(): Promise<AdminHealth> {
   return authedPost<Record<string, never>, AdminHealth>("adminHealthCheck", {});
 }
@@ -121,6 +130,15 @@ export async function recalcStandings(): Promise<AdminActionResult> {
   return authedPost<Record<string, never>, AdminActionResult>(
     "recalcStandings",
     {}
+  );
+}
+
+export async function updateSiteConfig(
+  payload: SiteConfigUpdatePayload
+): Promise<SiteConfigUpdateResult> {
+  return authedPost<SiteConfigUpdatePayload, SiteConfigUpdateResult>(
+    "updateSiteConfig",
+    payload
   );
 }
 

@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
+import { cfg } from "@/lib/siteConfig";
 import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const data = await getRTTData();
+  const config = data.config;
   const players = data?.players || [];
   const top = players.slice(0, 5);
 
@@ -13,43 +15,49 @@ export default async function HomePage() {
     <main className="rtt-page">
       <section className="rtt-page-inner">
         <PageHero
-          kicker="RTT NYC"
-          title="Run The Table"
-          subtitle="Scan in. Join the next battle. Get on the board."
+          kicker={cfg(config, "home.kicker", "RTT NYC")}
+          title={cfg(config, "home.title", "Run The Table")}
+          subtitle={cfg(
+            config,
+            "home.subtitle",
+            "Scan in. Join the next battle. Get on the board."
+          )}
         />
 
         {/* PRIMARY WORKFLOW */}
         <section className="grid gap-3">
           <Link href="/park" className="rtt-cta">
-            Scan In / Join
+            {cfg(config, "home.primaryCta", "Scan In / Join")}
           </Link>
 
           <div className="grid gap-3 md:grid-cols-2">
             <Link href="/standings" className="rtt-secondary">
-              View The Board
+              {cfg(config, "home.secondaryCtaBoard", "View The Board")}
             </Link>
 
             <Link href="/live" className="rtt-secondary">
-              Watch Live
+              {cfg(config, "home.secondaryCtaLive", "Watch Live")}
             </Link>
           </div>
         </section>
 
         {/* QUICK EXPLAINER */}
         <section className="rtt-section grid grid-cols-3 gap-2">
-          <MiniStep number="01" label="Scan" />
-          <MiniStep number="02" label="Play" />
-          <MiniStep number="03" label="Climb" />
+          <MiniStep number="01" label={cfg(config, "park.step1Title", "Join")} />
+          <MiniStep number="02" label={cfg(config, "park.step2Title", "Play")} />
+          <MiniStep number="03" label={cfg(config, "park.step3Title", "Climb")} />
         </section>
 
         {/* TOP BOARD */}
         <section className="rtt-section">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <p className="rtt-mini-kicker">Live Players</p>
+              <p className="rtt-mini-kicker">
+                {cfg(config, "home.livePlayersLabel", "Live Players")}
+              </p>
 
               <h2 className="mt-1 text-2xl font-black uppercase tracking-[-0.04em] md:text-3xl">
-                Top Board
+                {cfg(config, "home.topBoardTitle", "Top Board")}
               </h2>
             </div>
 
@@ -57,7 +65,7 @@ export default async function HomePage() {
               href="/standings"
               className="text-[10px] font-black uppercase tracking-[0.18em] text-rtt-red"
             >
-              Full Board
+              {cfg(config, "home.fullBoardLink", "Full Board")}
             </Link>
           </div>
 
@@ -93,25 +101,38 @@ export default async function HomePage() {
                 </Link>
               ))
             ) : (
-              <EmptyState title="No players loaded yet." error={data?.error} />
+              <EmptyState
+                title={cfg(
+                  config,
+                  "home.emptyPlayers",
+                  "No players loaded yet."
+                )}
+                error={data?.error}
+              />
             )}
           </div>
         </section>
 
         {/* SECONDARY JOIN REMINDER */}
         <section className="rtt-section rtt-mobile-card">
-          <p className="rtt-mini-kicker">At The Table?</p>
+          <p className="rtt-mini-kicker">
+            {cfg(config, "home.joinReminderKicker", "At The Table?")}
+          </p>
 
           <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.06em]">
-            Get in the next battle.
+            {cfg(config, "home.joinReminderTitle", "Get in the next battle.")}
           </h2>
 
           <p className="mt-3 text-sm font-bold leading-6 text-white/50">
-            Scan the QR code at the table or join directly from here.
+            {cfg(
+              config,
+              "home.joinReminderText",
+              "Scan the QR code at the table or join directly from here."
+            )}
           </p>
 
           <Link href="/join" className="rtt-cta mt-5 w-full">
-            Join Next Battle
+            {cfg(config, "home.joinReminderButton", "Join Next Battle")}
           </Link>
         </section>
       </section>

@@ -57,6 +57,8 @@ export type RTTPayout = {
   thirdPlacePayout: number;
 };
 
+export type RTTConfig = Record<string, string>;
+
 export type RTTData = {
   ok: boolean;
   updatedAt: string;
@@ -65,6 +67,7 @@ export type RTTData = {
   matches: RTTMatch[];
   weeklyResults: RTTWeeklyResult[];
   payout: RTTPayout | null;
+  config: RTTConfig;
   debug?: unknown;
   cache?: unknown;
   warning?: string;
@@ -101,12 +104,14 @@ type RawRTTData = {
   matches?: RawRTTMatch[];
   weeklyResults?: RawRTTWeeklyResult[];
   payout?: RawRTTPayout | null;
+  config?: unknown;
   data?: {
     players?: RawRTTPlayer[];
     livePlayers?: RawRTTPlayer[];
     matches?: RawRTTMatch[];
     weeklyResults?: RawRTTWeeklyResult[];
     payout?: RawRTTPayout | null;
+    config?: unknown;
     formUrl?: string;
     updatedAt?: string;
   };
@@ -170,6 +175,8 @@ export async function getRTTData(): Promise<RTTData> {
 
     const rawPayout = raw.payout || raw.data?.payout || null;
 
+    const rawConfig = raw.config || raw.data?.config || {};
+
     return {
       ok: true,
       updatedAt:
@@ -182,6 +189,7 @@ export async function getRTTData(): Promise<RTTData> {
       matches: normalizeMatches(rawMatches),
       weeklyResults: normalizeWeeklyResults(rawWeeklyResults),
       payout: normalizePayout(rawPayout),
+      config: normalizeConfig(rawConfig),
       debug: raw.debug,
       cache: raw.cache,
       warning: raw.warning,
@@ -198,6 +206,7 @@ export async function getRTTData(): Promise<RTTData> {
       matches: [],
       weeklyResults: [],
       payout: null,
+      config: {},
       error: error instanceof Error ? error.message : "Unknown RTT data error.",
     };
   }
@@ -324,6 +333,24 @@ function normalizePayout(payout: RawRTTPayout | null): RTTPayout | null {
     secondPlacePayout: toNumber(payout.secondPlacePayout, 0),
     thirdPlacePayout: toNumber(payout.thirdPlacePayout, 0),
   };
+}
+
+function normalizeConfig(config: unknown): RTTConfig {
+  if (!config || typeof config !== "object" || Array.isArray(config)) {
+    return {};
+  }
+
+  const output: RTTConfig = {};
+
+  Object.entries(config as Record<string, unknown>).forEach(([key, value]) => {
+    const cleanKey = clean(key);
+
+    if (!cleanKey) return;
+
+    output[cleanKey] = clean(value);
+  });
+
+  return output;
 }
 
 function clean(value: unknown): string {
