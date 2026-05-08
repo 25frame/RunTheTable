@@ -9,6 +9,7 @@ export default async function HomePage() {
   const matches = data?.matches || [];
 
   const top = players.slice(0, 5);
+  const king = players[0];
   const latestMatch = matches[0];
 
   return (
@@ -16,7 +17,23 @@ export default async function HomePage() {
       <section className="rtt-max">
         {/* HERO */}
         <section className="pt-6">
-          <p className="rtt-kicker">NYC Street Table Tennis</p>
+          <div className="mb-6 flex items-center gap-4">
+            <div className="grid h-20 w-20 shrink-0 place-items-center rounded-[1.6rem] bg-rtt-red shadow-[0_0_36px_rgba(255,0,0,0.35)]">
+              <span className="-skew-x-12 text-4xl font-black italic text-white">
+                R
+              </span>
+            </div>
+
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.28em] text-rtt-red">
+                NYC Street Table Tennis
+              </p>
+
+              <p className="mt-2 text-sm font-black uppercase tracking-[0.22em] text-white/40">
+                Live board · verified battles · street rules
+              </p>
+            </div>
+          </div>
 
           <h1 className="rtt-title mt-4">
             Run The
@@ -42,16 +59,15 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {/* RULE STRIP */}
           <div className="mt-6 grid gap-3 md:grid-cols-4">
             <InfoPill label="Format" value="Battles to 11" />
-            <InfoPill label="Board" value="Ranked Live" />
-            <InfoPill label="Result" value="Verified Wins" />
+            <InfoPill label="Board" value="Live Ranking" />
+            <InfoPill label="Results" value="Verified Wins" />
             <InfoPill label="Rule" value="Winner Climbs" />
           </div>
         </section>
 
-        {/* EVENT / STATUS STRIP */}
+        {/* BOARD STATUS */}
         <section className="mt-8 rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-[0_0_40px_rgba(255,0,0,0.08)]">
           <div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr] md:items-center">
             <div>
@@ -60,7 +76,7 @@ export default async function HomePage() {
               </p>
 
               <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.04em]">
-                Open Board / Street Rules
+                {king ? `${king.handle || king.name} holds #1` : "Open Board"}
               </h2>
 
               <p className="mt-2 text-sm font-bold leading-6 text-white/50">
@@ -72,7 +88,7 @@ export default async function HomePage() {
             <div className="grid grid-cols-3 gap-3 text-center">
               <MiniMetric label="Players" value={players.length} />
               <MiniMetric label="Battles" value={matches.length} />
-              <MiniMetric label="King" value={players[0]?.rank ? "#1" : "—"} />
+              <MiniMetric label="King" value={king ? "#1" : "—"} />
             </div>
           </div>
         </section>
@@ -98,41 +114,64 @@ export default async function HomePage() {
 
           <div className="grid gap-3">
             {top.length ? (
-              top.map((p, index) => (
-                <Link
-                  key={p.id}
-                  href={`/players/${p.id}`}
-                  className="group rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 transition hover:border-rtt-red hover:bg-white/[0.075]"
-                >
-                  <div className="flex items-center justify-between gap-5">
-                    <div className="flex min-w-0 items-center gap-4">
-                      <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-rtt-red text-lg font-black text-white shadow-[0_0_24px_rgba(255,0,0,0.22)]">
-                        #{p.rank || index + 1}
+              top.map((p, index) => {
+                const displayName = p.handle || p.name;
+                const isKing = index === 0;
+
+                return (
+                  <Link
+                    key={p.id}
+                    href={`/players/${p.id}`}
+                    className="group rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 transition hover:border-rtt-red hover:bg-white/[0.075]"
+                  >
+                    <div className="flex items-center justify-between gap-5">
+                      <div className="flex min-w-0 items-center gap-4">
+                        <div
+                          className={
+                            isKing
+                              ? "grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-rtt-red text-lg font-black text-white shadow-[0_0_30px_rgba(255,0,0,0.35)]"
+                              : "grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-white/10 text-lg font-black text-white"
+                          }
+                        >
+                          {isKing ? (
+                            <span className="-skew-x-12 text-2xl italic">R</span>
+                          ) : (
+                            `#${p.rank || index + 1}`
+                          )}
+                        </div>
+
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-2xl font-black uppercase tracking-[-0.04em] group-hover:text-rtt-red">
+                              {displayName}
+                            </p>
+
+                            {isKing ? (
+                              <span className="rounded-full bg-rtt-red px-2 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-white">
+                                King
+                              </span>
+                            ) : null}
+                          </div>
+
+                          <p className="mt-1 text-xs font-black uppercase tracking-[0.14em] text-white/40">
+                            Rank #{p.rank || index + 1} · {p.skill || "Unranked"} ·{" "}
+                            {p.wins}W / {p.losses}L · Diff {p.pointDiff}
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="min-w-0">
-                        <p className="truncate text-2xl font-black uppercase tracking-[-0.04em] group-hover:text-rtt-red">
-                          {p.handle || p.name}
+                      <div className="shrink-0 text-right">
+                        <p className="text-4xl font-black text-rtt-red">
+                          {p.points}
                         </p>
-
-                        <p className="mt-1 text-xs font-black uppercase tracking-[0.14em] text-white/40">
-                          {p.skill || "Unranked"} · {p.wins}W / {p.losses}L ·
-                          Diff {p.pointDiff}
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">
+                          points
                         </p>
                       </div>
                     </div>
-
-                    <div className="shrink-0 text-right">
-                      <p className="text-4xl font-black text-rtt-red">
-                        {p.points}
-                      </p>
-                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">
-                        points
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))
+                  </Link>
+                );
+              })
             ) : (
               <div className="rounded-[2rem] border border-white/10 bg-white/[0.045] p-6">
                 <p className="text-lg font-black uppercase">
@@ -213,6 +252,12 @@ export default async function HomePage() {
 
         {/* FINAL CTA */}
         <section className="mt-12 rounded-[2rem] border border-rtt-red/30 bg-rtt-red p-6 text-black">
+          <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-black">
+            <span className="-skew-x-12 text-3xl font-black italic text-white">
+              R
+            </span>
+          </div>
+
           <p className="text-xs font-black uppercase tracking-[0.22em]">
             Think you can climb?
           </p>
