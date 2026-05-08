@@ -44,40 +44,13 @@ export default async function HomePage() {
           `}
         </style>
 
-        {/* HEADER */}
-        <header className="flex items-center justify-between gap-4 pt-6">
-          <div className="flex items-center gap-4">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-rtt-red">
-              <span className="-skew-x-12 text-3xl font-black italic text-white">
-                R
-              </span>
-            </div>
-
-            <div>
-              <p className="text-lg font-black italic uppercase tracking-[-0.03em]">
-                Run The Table
-              </p>
-              <p className="mt-1 text-[10px] font-black uppercase tracking-[0.22em] text-white/40">
-                NYC Street Table Tennis
-              </p>
-            </div>
-          </div>
-
-          <Link
-            href="/standings"
-            className="rounded-full bg-rtt-red px-5 py-3 text-xs font-black uppercase tracking-[0.16em]"
-          >
-            Board
-          </Link>
-        </header>
-
         {/* HERO */}
-        <section className="rtt-enter rtt-enter-1 mt-16">
+        <section className="rtt-enter rtt-enter-1 pt-14 md:pt-20">
           <p className="text-xs font-black uppercase tracking-[0.26em] text-rtt-red">
             RTT NYC
           </p>
 
-          <h1 className="mt-4 max-w-5xl text-[clamp(4rem,12vw,10rem)] font-black italic uppercase leading-[0.86] tracking-[-0.08em]">
+          <h1 className="mt-4 max-w-5xl text-[clamp(4.25rem,12vw,10rem)] font-black italic uppercase leading-[0.86] tracking-[-0.08em]">
             Run The Table
           </h1>
 
