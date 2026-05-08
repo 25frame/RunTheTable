@@ -66,6 +66,8 @@ export type RTTData = {
   weeklyResults: RTTWeeklyResult[];
   payout: RTTPayout | null;
   debug?: unknown;
+  cache?: unknown;
+  warning?: string;
   error?: string;
 };
 
@@ -92,6 +94,7 @@ type RawRTTData = {
   ok?: boolean;
   success?: boolean;
   updatedAt?: string;
+  fetchedAt?: string;
   formUrl?: string;
   players?: RawRTTPlayer[];
   livePlayers?: RawRTTPlayer[];
@@ -105,44 +108,49 @@ type RawRTTData = {
     weeklyResults?: RawRTTWeeklyResult[];
     payout?: RawRTTPayout | null;
     formUrl?: string;
+    updatedAt?: string;
   };
   debug?: unknown;
+  cache?: unknown;
+  warning?: string;
   error?: string;
 };
 
+const RTT_API_URL = getRTTApiUrl();
+
 const RTT_FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform";
-
-/**
- * Stable server-side RTT API route.
- *
- * Do not use process.env.VERCEL_URL here.
- * VERCEL_URL can point to preview/protected deployments and cause random 403s.
- */
-function getRTTApiUrl(): string {
-  return (
-    process.env.RTT_INTERNAL_API_URL ||
-    "https://run-the-table.vercel.app/api/rtt"
-  );
-}
 
 export async function getRTTData(): Promise<RTTData> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const res = await fetch(getRTTApiUrl(), {
+    const response = await fetch(RTT_API_URL, {
+      method: "GET",
       signal: controller.signal,
       cache: "no-store",
     });
 
     clearTimeout(timeout);
 
-    if (!res.ok) {
-      throw new Error(`RTT API failed with HTTP ${res.status}`);
+    if (!response.ok) {
+      throw new Error(`RTT API failed with HTTP ${response.status}`);
     }
 
-    const raw = (await res.json()) as RawRTTData;
+    const text = await response.text();
+
+    if (!text.trim()) {
+      throw new Error("RTT API returned an empty response.");
+    }
+
+    let raw: RawRTTData;
+
+    try {
+      raw = JSON.parse(text) as RawRTTData;
+    } catch {
+      throw new Error("RTT API did not return valid JSON.");
+    }
 
     if (raw.ok === false || raw.success === false) {
       throw new Error(raw.error || "RTT API returned ok:false.");
@@ -155,30 +163,29 @@ export async function getRTTData(): Promise<RTTData> {
       raw.data?.livePlayers ||
       [];
 
-    const rawMatches =
-      raw.matches ||
-      raw.data?.matches ||
-      [];
+    const rawMatches = raw.matches || raw.data?.matches || [];
 
     const rawWeeklyResults =
-      raw.weeklyResults ||
-      raw.data?.weeklyResults ||
-      [];
+      raw.weeklyResults || raw.data?.weeklyResults || [];
 
-    const rawPayout =
-      raw.payout ||
-      raw.data?.payout ||
-      null;
+    const rawPayout = raw.payout || raw.data?.payout || null;
 
     return {
       ok: true,
-      updatedAt: raw.updatedAt || new Date().toISOString(),
+      updatedAt:
+        raw.updatedAt ||
+        raw.data?.updatedAt ||
+        raw.fetchedAt ||
+        new Date().toISOString(),
       formUrl: raw.formUrl || raw.data?.formUrl || RTT_FORM_URL,
       players: normalizePlayers(rawPlayers),
       matches: normalizeMatches(rawMatches),
       weeklyResults: normalizeWeeklyResults(rawWeeklyResults),
       payout: normalizePayout(rawPayout),
-      debug: raw.debug || raw,
+      debug: raw.debug,
+      cache: raw.cache,
+      warning: raw.warning,
+      error: raw.error,
     };
   } catch (error) {
     clearTimeout(timeout);
@@ -194,6 +201,33 @@ export async function getRTTData(): Promise<RTTData> {
       error: error instanceof Error ? error.message : "Unknown RTT data error.",
     };
   }
+}
+
+function getRTTApiUrl(): string {
+  /*
+   * Browser/client calls should use relative API route.
+   */
+  if (typeof window !== "undefined") {
+    return "/api/rtt";
+  }
+
+  /*
+   * Server-side Vercel builds/rendering need an absolute URL.
+   * Do NOT put "RTT_INTERNAL_API_URL=https://..." inside code.
+   * It must be an environment variable value only.
+   */
+  if (process.env.RTT_INTERNAL_API_URL) {
+    return process.env.RTT_INTERNAL_API_URL;
+  }
+
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}/api/rtt`;
+  }
+
+  /*
+   * Local dev server-side fallback.
+   */
+  return "http://localhost:3000/api/rtt";
 }
 
 function normalizePlayers(players: RawRTTPlayer[]): RTTPlayer[] {
@@ -238,7 +272,8 @@ function normalizeMatches(matches: RawRTTMatch[]): RTTMatch[] {
     return {
       row: match.row,
       eventId: clean(match.eventId) || "EVT-001",
-      matchId: clean(match.matchId) || `M-${String(index + 1).padStart(3, "0")}`,
+      matchId:
+        clean(match.matchId) || `M-${String(index + 1).padStart(3, "0")}`,
       type: clean(match.type) || "Street",
       table: clean(match.table) || "Table 1",
       playerAId: clean(match.playerAId),
@@ -256,18 +291,22 @@ function normalizeMatches(matches: RawRTTMatch[]): RTTMatch[] {
   });
 }
 
-function normalizeWeeklyResults(results: RawRTTWeeklyResult[]): RTTWeeklyResult[] {
-  return results.map((result): RTTWeeklyResult => ({
-    week: toNumber(result.week, 1),
-    winner: clean(result.winner) || "TBD",
-    players: toNumber(result.players, 0),
-    collected: toNumber(result.collected, 0),
-    organizerCut: toNumber(result.organizerCut, 0),
-    prizePool: toNumber(result.prizePool, 0),
-    first: toNumber(result.first, 0),
-    second: toNumber(result.second, 0),
-    third: toNumber(result.third, 0),
-  }));
+function normalizeWeeklyResults(
+  results: RawRTTWeeklyResult[]
+): RTTWeeklyResult[] {
+  return results.map((result): RTTWeeklyResult => {
+    return {
+      week: toNumber(result.week, 1),
+      winner: clean(result.winner) || "TBD",
+      players: toNumber(result.players, 0),
+      collected: toNumber(result.collected, 0),
+      organizerCut: toNumber(result.organizerCut, 0),
+      prizePool: toNumber(result.prizePool, 0),
+      first: toNumber(result.first, 0),
+      second: toNumber(result.second, 0),
+      third: toNumber(result.third, 0),
+    };
+  });
 }
 
 function normalizePayout(payout: RawRTTPayout | null): RTTPayout | null {
@@ -298,11 +337,16 @@ function toNumber(value: unknown, fallback: number): number {
 
 function toBoolean(value: unknown): boolean {
   if (value === true) return true;
-  if (typeof value === "string") return value.toLowerCase() === "true";
+  if (value === false) return false;
+
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    return normalized === "true" || normalized === "yes" || normalized === "1";
+  }
+
+  if (typeof value === "number") {
+    return value === 1;
+  }
+
   return false;
 }
-
-/**
- * Keeps this file recognized as a module by TypeScript/Vercel.
- */
-export {};
