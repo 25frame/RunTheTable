@@ -7,7 +7,12 @@ const APPS_SCRIPT_URL =
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform";
 
-export const revalidate = 60;
+/**
+ * Keep this route dynamic so Next/Vercel does not freeze old public data.
+ * We control caching manually with memoryCache below.
+ */
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type CachedRTTResponse = {
   data: Record<string, unknown>;
@@ -16,18 +21,39 @@ type CachedRTTResponse = {
 
 let memoryCache: CachedRTTResponse | null = null;
 
+/**
+ * Public read cache.
+ *
+ * First cold call may still be slow because it has to call:
+ * Vercel -> Apps Script -> Google Sheets.
+ *
+ * After first call, public pages and Nav should be much faster for 60 seconds.
+ */
 const MEMORY_CACHE_MS = 60 * 1000;
 
-export async function GET() {
+export async function GET(request: Request) {
   const now = Date.now();
+  const url = new URL(request.url);
 
-  if (memoryCache && now - memoryCache.cachedAt < MEMORY_CACHE_MS) {
+  /**
+   * Use /api/rtt?fresh=1 while testing to bypass memory cache.
+   */
+  const forceFresh =
+    url.searchParams.get("fresh") === "1" ||
+    url.searchParams.get("fresh") === "true";
+
+  if (
+    !forceFresh &&
+    memoryCache &&
+    now - memoryCache.cachedAt < MEMORY_CACHE_MS
+  ) {
     return NextResponse.json(
       {
         ...memoryCache.data,
         cache: {
           source: "memory",
           cachedAt: new Date(memoryCache.cachedAt).toISOString(),
+          ttlMs: MEMORY_CACHE_MS,
         },
       },
       {
@@ -42,14 +68,17 @@ export async function GET() {
   try {
     const response = await fetch(APPS_SCRIPT_URL, {
       method: "GET",
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
 
     const text = await response.text();
 
     if (!response.ok) {
       return NextResponse.json(
-        buildEmptyResponse(`Apps Script failed with HTTP ${response.status}`, text),
+        buildEmptyResponse(
+          `Apps Script failed with HTTP ${response.status}`,
+          text
+        ),
         {
           status: 200,
           headers: {
@@ -88,8 +117,9 @@ export async function GET() {
       {
         ...normalizedData,
         cache: {
-          source: "apps-script",
+          source: forceFresh ? "apps-script-fresh" : "apps-script",
           cachedAt: new Date(now).toISOString(),
+          ttlMs: MEMORY_CACHE_MS,
         },
       },
       {
@@ -107,6 +137,7 @@ export async function GET() {
           cache: {
             source: "stale-memory",
             cachedAt: new Date(memoryCache.cachedAt).toISOString(),
+            ttlMs: MEMORY_CACHE_MS,
           },
           warning:
             error instanceof Error
@@ -193,10 +224,9 @@ export async function POST(request: Request) {
     const response = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
       headers: {
-        /*
-         * Google Apps Script web apps are often most reliable with text/plain.
-         * Your Apps Script doPost reads e.postData.contents and parses JSON,
-         * so text/plain is fine and avoids some CORS/preflight weirdness.
+        /**
+         * Google Apps Script web apps are most reliable with text/plain.
+         * Apps Script doPost reads e.postData.contents and parses JSON.
          */
         "Content-Type": "text/plain;charset=utf-8",
       },
@@ -240,9 +270,9 @@ export async function POST(request: Request) {
       );
     }
 
-    /*
+    /**
      * Any successful POST can change players, matches, users, standings,
-     * or setup. Clear memory cache so the next GET pulls fresh Apps Script data.
+     * places, payouts, or config. Clear memory cache so the next GET pulls fresh.
      */
     memoryCache = null;
 
@@ -296,5 +326,11 @@ function buildEmptyResponse(error: string, raw?: string) {
     matches: [],
     weeklyResults: [],
     payout: null,
+    places: [],
+    config: {},
+    debug: {
+      fallback: true,
+      source: "app/api/rtt/route.ts",
+    },
   };
 }
