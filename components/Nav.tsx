@@ -8,10 +8,10 @@ export function Nav() {
 
   const items = [
     { label: "HOME", href: "/" },
+    { label: "JOIN", href: "/join" },
     { label: "LIVE", href: "/live" },
     { label: "BOARD", href: "/standings" },
     { label: "CREW", href: "/players" },
-    { label: "RULES", href: "/rules" },
   ];
 
   return (
@@ -39,10 +39,10 @@ export function Nav() {
           </button>
 
           <button
-            onClick={() => router.push("/live")}
+            onClick={() => router.push("/join")}
             className="shrink-0 rounded-full bg-rtt-red px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] md:px-5 md:py-3 md:text-xs"
           >
-            Live
+            Join
           </button>
         </div>
       </header>

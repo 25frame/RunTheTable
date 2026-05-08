@@ -1,40 +1,33 @@
 import Link from "next/link";
-
-const FORM_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLScGDbgA5YOItre1EjvQIxlvi3pIByBDq10HFW24MAjOw7tZZA/viewform";
+import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-static";
 
 export default function PlayPage() {
   return (
-    <main className="rtt-shell text-white">
-      <section className="rtt-max">
-        <p className="rtt-kicker">Next Battle</p>
+    <main className="rtt-page">
+      <section className="rtt-page-inner">
+        <PageHero
+          kicker="Next Battle"
+          title="Show Up"
+          subtitle="Join the next battle, get added to the board, and play tracked matches."
+        />
 
-        <h1 className="rtt-title">
-          SHOW
-          <br />
-          UP
-        </h1>
-
-        <p className="rtt-subtitle">
-          Sign up, get on the board, and play tracked battles.
-        </p>
-
-        <div className="mt-8 grid gap-3">
-          <a
-            href={FORM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rtt-cta"
-          >
+        <section className="grid gap-3">
+          <Link href="/join" className="rtt-cta">
             Join Next Battle
-          </a>
-
-          <Link href="/standings" className="rtt-secondary">
-            View The Board
           </Link>
-        </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <Link href="/standings" className="rtt-secondary">
+              View The Board
+            </Link>
+
+            <Link href="/live" className="rtt-secondary">
+              Watch Live
+            </Link>
+          </div>
+        </section>
       </section>
     </main>
   );

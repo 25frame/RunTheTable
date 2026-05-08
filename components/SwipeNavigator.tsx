@@ -3,13 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useRef } from "react";
 
-const SWIPE_ROUTES = [
-  "/",
-  "/live",
-  "/standings",
-  "/players",
-  "/rules",
-];
+const SWIPE_ROUTES = ["/", "/join", "/live", "/standings", "/players"];
 
 const MIN_SWIPE_DISTANCE = 55;
 const MAX_VERTICAL_DRIFT = 80;
@@ -28,7 +22,6 @@ export function SwipeNavigator() {
     const exactIndex = SWIPE_ROUTES.indexOf(path);
     if (exactIndex !== -1) return exactIndex;
 
-    // Keep player detail pages grouped with CREW.
     if (path.startsWith("/players")) return SWIPE_ROUTES.indexOf("/players");
 
     return -1;
@@ -90,14 +83,11 @@ export function SwipeNavigator() {
       Math.abs(deltaX) > Math.abs(deltaY);
 
     if (!isHorizontalSwipe) return;
-
-    // Avoid weird accidental very slow drags.
     if (elapsed > 900) return;
 
     const currentIndex = getRouteIndex(pathname);
     if (currentIndex === -1) return;
 
-    // Swipe left = next page.
     if (deltaX < 0) {
       const nextIndex = Math.min(currentIndex + 1, SWIPE_ROUTES.length - 1);
       const nextRoute = SWIPE_ROUTES[nextIndex];
@@ -106,7 +96,6 @@ export function SwipeNavigator() {
       return;
     }
 
-    // Swipe right = previous page.
     if (deltaX > 0) {
       const previousIndex = Math.max(currentIndex - 1, 0);
       const previousRoute = SWIPE_ROUTES[previousIndex];

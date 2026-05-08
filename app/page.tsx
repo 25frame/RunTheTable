@@ -15,22 +15,24 @@ export default async function HomePage() {
         <PageHero
           kicker="RTT NYC"
           title="Run The Table"
-          subtitle="Scan in. Get ranked. Battle live. Climb the board."
+          subtitle="Scan in. Join the next battle. Get on the board."
         />
 
         {/* CTA */}
         <section className="grid gap-3">
-          <Link href="/park" className="rtt-cta">
-            Get Ranked
-          </Link>
-
-          <Link href="/join" className="rtt-secondary">
+          <Link href="/join" className="rtt-cta">
             Join Next Battle
           </Link>
 
-          <Link href="/standings" className="rtt-secondary">
-            View The Board
-          </Link>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Link href="/standings" className="rtt-secondary">
+              View The Board
+            </Link>
+
+            <Link href="/live" className="rtt-secondary">
+              Watch Live
+            </Link>
+          </div>
         </section>
 
         {/* TOP BOARD */}
