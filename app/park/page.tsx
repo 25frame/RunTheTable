@@ -14,6 +14,7 @@ export default async function ParkPage() {
       <section className="rtt-page-inner">
         <PageHero
           kicker={cfg(config, "park.kicker", "Scan In")}
+          tagline={cfg(config, "site.tagline", "NYC Street Table Tennis")}
           title={cfg(config, "park.title", "Table Check")}
           subtitle={cfg(
             config,
@@ -47,19 +48,31 @@ export default async function ParkPage() {
             <Step
               number="01"
               title={cfg(config, "park.step1Title", "Join")}
-              text={cfg(config, "park.step1Text", "Add your name and contact info.")}
+              text={cfg(
+                config,
+                "park.step1Text",
+                "Add your name and contact info."
+              )}
             />
 
             <Step
               number="02"
               title={cfg(config, "park.step2Title", "Play")}
-              text={cfg(config, "park.step2Text", "Admin assigns you to a battle.")}
+              text={cfg(
+                config,
+                "park.step2Text",
+                "Admin assigns you to a battle."
+              )}
             />
 
             <Step
               number="03"
               title={cfg(config, "park.step3Title", "Climb")}
-              text={cfg(config, "park.step3Text", "Verified results update the board.")}
+              text={cfg(
+                config,
+                "park.step3Text",
+                "Verified results update the board."
+              )}
             />
           </div>
         </section>

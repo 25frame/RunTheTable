@@ -21,6 +21,7 @@ export default async function LivePage() {
       <section className="rtt-page-inner">
         <PageHero
           kicker={cfg(config, "live.kicker", "Live")}
+          tagline={cfg(config, "site.tagline", "NYC Street Table Tennis")}
           title={cfg(config, "live.title", "Watch Live")}
           subtitle={cfg(
             config,

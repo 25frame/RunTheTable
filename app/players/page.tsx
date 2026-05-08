@@ -1,20 +1,27 @@
 import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
+import { cfg } from "@/lib/siteConfig";
 import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
 export default async function PlayersPage() {
   const data = await getRTTData();
+  const config = data.config;
   const players = data?.players || [];
 
   return (
     <main className="rtt-page">
       <section className="rtt-page-inner">
         <PageHero
-          kicker="Crew"
-          title="The Crew"
-          subtitle="Every player on the table. Every name can be called out."
+          kicker={cfg(config, "players.kicker", "Crew")}
+          tagline={cfg(config, "site.tagline", "NYC Street Table Tennis")}
+          title={cfg(config, "players.title", "The Crew")}
+          subtitle={cfg(
+            config,
+            "players.subtitle",
+            "Every player on the table. Every name can be called out."
+          )}
         />
 
         <section className="rtt-section rtt-list">

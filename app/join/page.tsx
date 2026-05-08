@@ -178,6 +178,10 @@ export default function JoinPage() {
               {cfg(config, "join.successKicker", "You’re In")}
             </p>
 
+            <p className="mt-2 max-w-xl text-[10px] font-black uppercase leading-5 tracking-[0.22em] text-white/35">
+              {cfg(config, "site.tagline", "NYC Street Table Tennis")}
+            </p>
+
             <h1 className="rtt-hero-title">
               {splitTitle(
                 cfg(config, "join.successHeroTitle", "Welcome To RTT")
@@ -239,6 +243,10 @@ export default function JoinPage() {
         <section className="rtt-hero">
           <p className="rtt-hero-kicker">
             {cfg(config, "join.kicker", "Join")}
+          </p>
+
+          <p className="mt-2 max-w-xl text-[10px] font-black uppercase leading-5 tracking-[0.22em] text-white/35">
+            {cfg(config, "site.tagline", "NYC Street Table Tennis")}
           </p>
 
           <h1 className="rtt-hero-title">

@@ -15,6 +15,7 @@ export default async function StandingsPage() {
       <section className="rtt-page-inner">
         <PageHero
           kicker={cfg(config, "standings.kicker", "Board")}
+          tagline={cfg(config, "site.tagline", "NYC Street Table Tennis")}
           title={cfg(config, "standings.title", "The Board")}
           subtitle={cfg(
             config,

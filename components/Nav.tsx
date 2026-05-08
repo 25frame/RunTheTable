@@ -43,6 +43,13 @@ export function Nav() {
     return null;
   }
 
+  const siteShortName = cfg(config, "site.shortName", "RTT NYC");
+  const siteTagline = cfg(
+    config,
+    "site.tagline",
+    "NYC Street Table Tennis"
+  );
+
   const loginHref = isAdmin ? "/admin/dashboard" : "/login";
   const loginLabel = isAdmin
     ? cfg(config, "nav.admin", "ADMIN")
@@ -72,11 +79,17 @@ export function Nav() {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="h-5 w-[2px] bg-white/20" />
+                <span className="h-8 w-[2px] shrink-0 bg-white/20" />
 
-                <span className="truncate text-[1.15rem] font-black italic uppercase leading-none tracking-[-0.03em] md:text-2xl">
-                  {cfg(config, "site.shortName", "RTT NYC")}
-                </span>
+                <div className="min-w-0">
+                  <span className="block truncate text-[1.15rem] font-black italic uppercase leading-none tracking-[-0.03em] md:text-2xl">
+                    {siteShortName}
+                  </span>
+
+                  <span className="mt-1 block max-w-[170px] truncate text-[8px] font-black uppercase tracking-[0.18em] text-white/35 sm:max-w-none md:text-[9px]">
+                    {siteTagline}
+                  </span>
+                </div>
               </div>
             </div>
           </button>

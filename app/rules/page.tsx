@@ -1,3 +1,5 @@
+import { getRTTData } from "@/lib/googleData";
+import { cfg } from "@/lib/siteConfig";
 import { PageHero } from "@/components/PageHero";
 
 const RULES = [
@@ -23,16 +25,20 @@ const RULES = [
   },
 ];
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
-export default function RulesPage() {
+export default async function RulesPage() {
+  const data = await getRTTData();
+  const config = data.config;
+
   return (
     <main className="rtt-page">
       <section className="rtt-page-inner">
         <PageHero
-          kicker="Rules"
-          title="Table Code"
-          subtitle="Fast rules for fast matches."
+          kicker={cfg(config, "rules.kicker", "Rules")}
+          tagline={cfg(config, "site.tagline", "NYC Street Table Tennis")}
+          title={cfg(config, "rules.title", "Table Code")}
+          subtitle={cfg(config, "rules.subtitle", "Fast rules for fast matches.")}
         />
 
         <section className="rtt-section rtt-list">

@@ -1,19 +1,22 @@
 import { getRTTData } from "@/lib/googleData";
+import { cfg } from "@/lib/siteConfig";
 import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
 export default async function ResultsPage() {
   const data = await getRTTData();
+  const config = data.config;
   const matches = data?.matches || [];
 
   return (
     <main className="rtt-page">
       <section className="rtt-page-inner">
         <PageHero
-          kicker="Battle History"
-          title="Results"
-          subtitle="Receipts stay on the board."
+          kicker={cfg(config, "results.kicker", "Battle History")}
+          tagline={cfg(config, "site.tagline", "NYC Street Table Tennis")}
+          title={cfg(config, "results.title", "Results")}
+          subtitle={cfg(config, "results.subtitle", "Receipts stay on the board.")}
         />
 
         <section className="rtt-section rtt-list">

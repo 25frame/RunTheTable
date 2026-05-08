@@ -16,6 +16,7 @@ export default async function HomePage() {
       <section className="rtt-page-inner">
         <PageHero
           kicker={cfg(config, "home.kicker", "RTT NYC")}
+          tagline={cfg(config, "site.tagline", "NYC Street Table Tennis")}
           title={cfg(config, "home.title", "Run The Table")}
           subtitle={cfg(
             config,
@@ -43,9 +44,18 @@ export default async function HomePage() {
 
         {/* QUICK EXPLAINER */}
         <section className="rtt-section grid grid-cols-3 gap-2">
-          <MiniStep number="01" label={cfg(config, "park.step1Title", "Join")} />
-          <MiniStep number="02" label={cfg(config, "park.step2Title", "Play")} />
-          <MiniStep number="03" label={cfg(config, "park.step3Title", "Climb")} />
+          <MiniStep
+            number="01"
+            label={cfg(config, "park.step1Title", "Join")}
+          />
+          <MiniStep
+            number="02"
+            label={cfg(config, "park.step2Title", "Play")}
+          />
+          <MiniStep
+            number="03"
+            label={cfg(config, "park.step3Title", "Climb")}
+          />
         </section>
 
         {/* TOP BOARD */}

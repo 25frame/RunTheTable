@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
+import { cfg } from "@/lib/siteConfig";
 import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { getStatus, getTier, StatusPill } from "@/components/StatusPill";
 import { notFound } from "next/navigation";
@@ -7,9 +8,16 @@ import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function PlayerProfilePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PlayerProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
-  const { players, matches } = await getRTTData();
+  const data = await getRTTData();
+  const config = data.config;
+  const { players, matches } = data;
+
   const player = players.find((p) => p.id === id);
 
   if (!player) notFound();
@@ -22,20 +30,36 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
       m.playerB === player.name
   );
 
-  const liveMatch = playerMatches.find((m) => (m.status || "").toLowerCase() === "live");
+  const liveMatch = playerMatches.find(
+    (m) => (m.status || "").toLowerCase() === "live"
+  );
+
   const tier = getTier(player);
   const status = getStatus(player);
 
   return (
     <main className="rtt-shell text-white">
       <section className="rtt-max">
+        <div className="mb-5">
+          <p className="rtt-kicker">
+            {cfg(config, "playerProfile.kicker", "Competitor Profile")}
+          </p>
+
+          <p className="mt-2 text-[10px] font-black uppercase tracking-[0.22em] text-white/35">
+            {cfg(config, "site.tagline", "NYC Street Table Tennis")}
+          </p>
+        </div>
+
         <div className="rtt-card overflow-hidden">
           <div className="h-80 bg-black">
             <PlayerAvatar player={player} />
           </div>
 
           <div className="p-5">
-            <p className="rtt-kicker">Competitor Profile</p>
+            <p className="rtt-kicker">
+              {cfg(config, "playerProfile.rankLabel", `Rank #${player.rank}`)}
+            </p>
+
             <h1 className="mt-3 text-6xl font-black italic uppercase leading-none tracking-[-0.08em]">
               {player.handle || player.name}
             </h1>
@@ -52,37 +76,69 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
               <Stat label="Score" value={player.points} />
             </div>
 
-            <Link href={`/players/${player.id}/edit`} className="rtt-cta mt-6 w-full">
-              Edit Profile
+            <Link
+              href={`/players/${player.id}/edit`}
+              className="rtt-cta mt-6 w-full"
+            >
+              {cfg(config, "playerProfile.editButton", "Edit Profile")}
             </Link>
           </div>
         </div>
 
-        {liveMatch && (
+        {liveMatch ? (
           <section className="rtt-card mt-5 p-5">
-            <p className="rtt-kicker">Live Now</p>
+            <p className="rtt-kicker">
+              {cfg(config, "playerProfile.liveNow", "Live Now")}
+            </p>
+
             <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-              <p className="text-left text-3xl font-black italic uppercase leading-none">{liveMatch.playerA}</p>
+              <p className="text-left text-3xl font-black italic uppercase leading-none">
+                {liveMatch.playerA}
+              </p>
+
               <p className="text-2xl font-black text-rtt-red">VS</p>
-              <p className="text-right text-3xl font-black italic uppercase leading-none">{liveMatch.playerB}</p>
+
+              <p className="text-right text-3xl font-black italic uppercase leading-none">
+                {liveMatch.playerB}
+              </p>
             </div>
+
             <p className="mt-5 text-center text-7xl font-black">
               {liveMatch.scoreA} — {liveMatch.scoreB}
             </p>
           </section>
-        )}
+        ) : null}
 
         <section className="mt-6">
-          <p className="rtt-kicker">Battle Log</p>
+          <p className="rtt-kicker">
+            {cfg(config, "playerProfile.battleLog", "Battle Log")}
+          </p>
+
           <div className="mt-4 grid gap-3">
-            {playerMatches.slice(0, 8).map((m) => (
-              <div key={`${m.matchId}-${m.row}`} className="rtt-card p-4">
-                <p className="text-lg font-black uppercase">{m.playerA} vs {m.playerB}</p>
-                <p className="mt-1 text-sm text-white/50">
-                  {m.score} / Winner: {m.winner || "TBD"} / {m.status || "Scheduled"}
+            {playerMatches.length ? (
+              playerMatches.slice(0, 8).map((m) => (
+                <div key={`${m.matchId}-${m.row}`} className="rtt-card p-4">
+                  <p className="text-lg font-black uppercase">
+                    {m.playerA} vs {m.playerB}
+                  </p>
+
+                  <p className="mt-1 text-sm text-white/50">
+                    {m.score} / Winner: {m.winner || "TBD"} /{" "}
+                    {m.status || "Scheduled"}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="rtt-card p-4">
+                <p className="text-sm font-black uppercase tracking-[0.14em] text-white/50">
+                  {cfg(
+                    config,
+                    "playerProfile.noMatches",
+                    "No battle log yet."
+                  )}
                 </p>
               </div>
-            ))}
+            )}
           </div>
         </section>
       </section>
@@ -93,7 +149,10 @@ export default async function PlayerProfilePage({ params }: { params: Promise<{ 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-2xl bg-black/55 p-4">
-      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">{label}</p>
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">
+        {label}
+      </p>
+
       <p className="mt-1 text-3xl font-black">{value}</p>
     </div>
   );
