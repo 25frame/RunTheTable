@@ -38,8 +38,15 @@ export function Nav() {
     }
   }
 
-  // Admin pages use AdminShell, so do not show the public header or bottom nav there.
-  if (pathname.startsWith("/admin")) {
+  const skinOwnedRoute =
+    pathname === "/join" ||
+    pathname.startsWith("/join/") ||
+    pathname === "/park" ||
+    pathname.startsWith("/park/");
+
+  // Admin pages use AdminShell. The new RTT skin owns /join and /park,
+  // so hide the legacy public header/bottom nav on those skin routes.
+  if (pathname.startsWith("/admin") || skinOwnedRoute) {
     return null;
   }
 
