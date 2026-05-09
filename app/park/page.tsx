@@ -1,80 +1,108 @@
-import { RTTSkinShell } from "@/components/rtt-skin/RTTSkinShell";
-import { RTTSkinHero } from "@/components/rtt-skin/RTTSkinHero";
-import { RTTGlassPanel } from "@/components/rtt-skin/RTTGlassPanel";
-import { RTTPrimaryLink, RTTSecondaryLink } from "@/components/rtt-skin/RTTButtons";
+import Link from "next/link";
 import { getRTTData } from "@/lib/googleData";
 import { cfg } from "@/lib/siteConfig";
+import { PageHero } from "@/components/PageHero";
 
 export const dynamic = "force-dynamic";
 
-type SafeData = Awaited<ReturnType<typeof getRTTData>>;
-
-async function safeRTTData(): Promise<SafeData | null> {
-  try {
-    return await getRTTData();
-  } catch {
-    return null;
-  }
-}
-
 export default async function ParkPage() {
-  const data = await safeRTTData();
-  const config = data?.config || {};
+  const data = await getRTTData();
+  const config = data.config;
 
   return (
-    <RTTSkinShell
-      config={config}
-      activeHref="/park"
-      headerTitle={cfg(config, "park.headerTitle", "TABLE CHECK")}
-      statusLabel={cfg(config, "nav.status", "LIVE")}
-      showBack={false}
-    >
-      <RTTSkinHero
-        tagline={cfg(config, "park.subtitle", "You found the table. Check in, compete, and get on the board.")}
-        wordmarkAlt={cfg(config, "site.name", "Run The Table")}
-      />
+    <main className="rtt-page">
+      <section className="rtt-page-inner">
+        <PageHero
+          kicker={cfg(config, "park.kicker", "Scan In")}
+          tagline={cfg(config, "site.tagline", "NYC Street Table Tennis")}
+          title={cfg(config, "park.title", "Table Check")}
+          subtitle={cfg(
+            config,
+            "park.subtitle",
+            "You found the table. Join the next battle and get added to the board."
+          )}
+        />
 
-      <div className="rttb-stack">
-        <RTTGlassPanel>
-          <span className="rttb-mini-kicker">{cfg(config, "park.kicker", "QR LANDING")}</span>
-          <h1 className="rttb-panel-title">{cfg(config, "park.title", "Table Check")}</h1>
-          <p className="rttb-panel-subtitle">
-            {cfg(config, "park.body", "Lock in your player info and join the next available battle.")}
+        <section className="grid gap-3">
+          <Link href="/join" className="rtt-cta">
+            {cfg(config, "park.primaryCta", "Join Next Battle")}
+          </Link>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <Link href="/standings" className="rtt-secondary">
+              {cfg(config, "park.secondaryCtaBoard", "View The Board")}
+            </Link>
+
+            <Link href="/live" className="rtt-secondary">
+              {cfg(config, "park.secondaryCtaLive", "Watch Live")}
+            </Link>
+          </div>
+        </section>
+
+        <section className="rtt-section rtt-mobile-card">
+          <p className="rtt-mini-kicker">
+            {cfg(config, "park.howItWorksKicker", "How It Works")}
           </p>
 
-          <div className="rttb-stack" style={{ marginTop: 16 }}>
-            <RTTPrimaryLink href="/join">{cfg(config, "park.primaryCta", "CHECK-IN NOW")}</RTTPrimaryLink>
-            <RTTSecondaryLink href="/standings">{cfg(config, "park.secondaryCtaBoard", "VIEW THE BOARD")}</RTTSecondaryLink>
-          </div>
-        </RTTGlassPanel>
+          <div className="mt-4 grid gap-4">
+            <Step
+              number="01"
+              title={cfg(config, "park.step1Title", "Join")}
+              text={cfg(
+                config,
+                "park.step1Text",
+                "Add your name and contact info."
+              )}
+            />
 
-        <RTTGlassPanel>
-          <span className="rttb-mini-kicker">{cfg(config, "park.howItWorksKicker", "HOW IT WORKS")}</span>
-          <div className="rttb-step-list">
-            <div className="rttb-step">
-              <div className="rttb-step-number">1</div>
-              <div>
-                <strong>{cfg(config, "park.step1Title", "Check In")}</strong>
-                <span>{cfg(config, "park.step1Text", "Add your name, contact info, and skill level.")}</span>
-              </div>
-            </div>
-            <div className="rttb-step">
-              <div className="rttb-step-number">2</div>
-              <div>
-                <strong>{cfg(config, "park.step2Title", "Get Matched")}</strong>
-                <span>{cfg(config, "park.step2Text", "Admin assigns battles and keeps score live.")}</span>
-              </div>
-            </div>
-            <div className="rttb-step">
-              <div className="rttb-step-number">3</div>
-              <div>
-                <strong>{cfg(config, "park.step3Title", "Run The Table")}</strong>
-                <span>{cfg(config, "park.step3Text", "Final wins move you up the public board.")}</span>
-              </div>
-            </div>
+            <Step
+              number="02"
+              title={cfg(config, "park.step2Title", "Play")}
+              text={cfg(
+                config,
+                "park.step2Text",
+                "Admin assigns you to a battle."
+              )}
+            />
+
+            <Step
+              number="03"
+              title={cfg(config, "park.step3Title", "Climb")}
+              text={cfg(
+                config,
+                "park.step3Text",
+                "Verified results update the board."
+              )}
+            />
           </div>
-        </RTTGlassPanel>
-      </div>
-    </RTTSkinShell>
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function Step({
+  number,
+  title,
+  text,
+}: {
+  number: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-black/45 p-4">
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-rtt-red">
+        {number}
+      </p>
+
+      <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.05em]">
+        {title}
+      </h2>
+
+      <p className="mt-2 text-sm font-bold leading-6 text-white/50">
+        {text}
+      </p>
+    </div>
   );
 }
