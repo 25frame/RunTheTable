@@ -83,6 +83,12 @@ export default function AdminDashboardPage() {
         hot: false,
       },
       {
+        title: "Skins",
+        description: "Switch site theme.",
+        href: "/admin/skins",
+        hot: false,
+      },
+      {
         title: "Setup",
         description: "Event settings.",
         href: "/admin/setup",
@@ -237,7 +243,7 @@ export default function AdminDashboardPage() {
         <AdminNotice title="Admin Operations">
           Use QR Check-In for players scanning at the table. Use Players for
           roster cleanup and deletion. Use Places for table locations. Use Config
-          for public page wording.
+          for public page wording. Use Skins to switch visual packages.
         </AdminNotice>
       </div>
 

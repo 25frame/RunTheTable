@@ -2,45 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================================
-   RTT GLOBAL THEME
-   ============================================================ */
-
-:root {
-  --rtt-red: #e10600;
-  --rtt-bg: #030303;
-  --rtt-panel: rgba(255, 255, 255, 0.055);
-  --rtt-panel-soft: rgba(255, 255, 255, 0.04);
-  --rtt-line: rgba(255, 255, 255, 0.1);
-  --rtt-muted: rgba(255, 255, 255, 0.52);
-  --rtt-faint: rgba(255, 255, 255, 0.35);
-}
-
-html {
-  background: var(--rtt-bg);
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  color: white;
-  background:
-    radial-gradient(circle at 18% -8%, rgba(225, 6, 0, 0.32), transparent 26%),
-    radial-gradient(circle at 92% 0%, rgba(255, 255, 255, 0.07), transparent 22%),
-    linear-gradient(180deg, #060606 0%, #000 45%, #070707 100%);
-}
-
 * {
   box-sizing: border-box;
 }
 
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
+html,
+body {
+  min-height: 100%;
+  background: #000;
+  color: #fff;
 }
 
-button {
-  font: inherit;
+body {
+  margin: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
 }
 
 a {
@@ -48,293 +25,320 @@ a {
   text-decoration: none;
 }
 
+button,
 input,
-textarea,
-select {
-  color-scheme: dark;
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }
 
 /* ============================================================
-   LEGACY COMPATIBILITY
-   Keep these so older pages/components do not break.
-   New pages should prefer .rtt-page and .rtt-page-inner.
+   RTT BASE THEME VARIABLES
    ============================================================ */
 
+:root,
+html[data-rtt-skin="default"] {
+  --rtt-bg: #000000;
+  --rtt-bg-soft: rgba(255, 255, 255, 0.045);
+  --rtt-card: rgba(255, 255, 255, 0.055);
+  --rtt-card-hot: rgba(239, 0, 0, 1);
+  --rtt-border: rgba(255, 255, 255, 0.1);
+  --rtt-border-hot: rgba(239, 0, 0, 0.65);
+
+  --rtt-red: #ef0000;
+  --rtt-red-soft: rgba(239, 0, 0, 0.15);
+  --rtt-red-dark: #7f0000;
+
+  --rtt-text: #ffffff;
+  --rtt-text-muted: rgba(255, 255, 255, 0.52);
+  --rtt-text-faint: rgba(255, 255, 255, 0.35);
+
+  --rtt-shadow: 0 0 40px rgba(0, 0, 0, 0.45);
+  --rtt-glow: 0 0 30px rgba(239, 0, 0, 0.2);
+
+  --rtt-hero-bg:
+    radial-gradient(circle at 20% 10%, rgba(239, 0, 0, 0.16), transparent 28%),
+    radial-gradient(circle at 80% 20%, rgba(239, 0, 0, 0.08), transparent 28%),
+    #000000;
+}
+
+html[data-rtt-skin="street-red"] {
+  --rtt-bg: #050000;
+  --rtt-bg-soft: rgba(239, 0, 0, 0.08);
+  --rtt-card: rgba(9, 9, 9, 0.94);
+  --rtt-card-hot: #ef0000;
+  --rtt-border: rgba(255, 255, 255, 0.14);
+  --rtt-border-hot: rgba(239, 0, 0, 0.9);
+
+  --rtt-red: #ff1010;
+  --rtt-red-soft: rgba(255, 16, 16, 0.22);
+  --rtt-red-dark: #b40000;
+
+  --rtt-text: #ffffff;
+  --rtt-text-muted: rgba(255, 255, 255, 0.62);
+  --rtt-text-faint: rgba(255, 255, 255, 0.42);
+
+  --rtt-shadow: 0 0 55px rgba(0, 0, 0, 0.7);
+  --rtt-glow: 0 0 45px rgba(255, 16, 16, 0.32);
+
+  --rtt-hero-bg:
+    linear-gradient(135deg, rgba(239, 0, 0, 0.24), transparent 35%),
+    radial-gradient(circle at 85% 0%, rgba(255, 16, 16, 0.24), transparent 30%),
+    linear-gradient(180deg, #130000 0%, #050000 42%, #000000 100%);
+}
+
+/* Tailwind token overrides used across the project. */
+.bg-rtt-red {
+  background-color: var(--rtt-red) !important;
+}
+
+.text-rtt-red {
+  color: var(--rtt-red) !important;
+}
+
+.border-rtt-red {
+  border-color: var(--rtt-red) !important;
+}
+
+.focus\:border-rtt-red:focus {
+  border-color: var(--rtt-red) !important;
+}
+
+/* ============================================================
+   RTT APP SHELL
+   ============================================================ */
+
+.rtt-page,
 .rtt-shell {
   min-height: 100vh;
-  padding: 1rem 1.25rem 6.5rem;
-  color: #fff;
+  background: var(--rtt-hero-bg);
+  color: var(--rtt-text);
+  padding-bottom: 7rem;
 }
 
+.rtt-page-inner,
 .rtt-max {
   width: 100%;
-  max-width: 1100px;
+  max-width: 64rem;
   margin: 0 auto;
+  padding: 1.5rem 1.25rem 2.5rem;
 }
 
-.rtt-kicker {
-  color: var(--rtt-red);
-  font-size: 0.68rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.26em;
-}
-
-.rtt-title {
-  margin-top: 0.75rem;
-  font-size: clamp(3.35rem, 14.5vw, 7.5rem);
-  line-height: 0.82;
-  letter-spacing: -0.085em;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
-}
-
-.rtt-subtitle {
-  margin-top: 1.1rem;
-  max-width: 42rem;
-  color: var(--rtt-muted);
-  font-size: 1rem;
-  line-height: 1.6;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.rtt-card {
-  border: 1px solid var(--rtt-line);
-  background: var(--rtt-panel);
-  border-radius: 1.65rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
-  backdrop-filter: blur(12px);
-}
-
-/* ============================================================
-   BUTTONS
-   ============================================================ */
-
-.rtt-cta,
-.rtt-secondary {
-  display: inline-flex;
-  min-height: 3.35rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 1.25rem;
-  padding: 0 1.25rem;
-  font-size: 0.74rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  transition:
-    transform 140ms ease,
-    border-color 140ms ease,
-    background 140ms ease,
-    color 140ms ease;
-}
-
-.rtt-cta {
-  background: var(--rtt-red);
-  color: white;
-}
-
-.rtt-secondary {
-  border: 1px solid var(--rtt-line);
-  background: var(--rtt-panel);
-  color: rgba(255, 255, 255, 0.78);
-}
-
-.rtt-cta:active,
-.rtt-secondary:active {
-  transform: scale(0.985);
-}
-
-/* ============================================================
-   MOBILE-FIRST PAGE SYSTEM
-   ============================================================ */
-
-.rtt-page {
-  min-height: 100vh;
-  padding-bottom: 6.5rem;
-  color: #fff;
-}
-
-.rtt-page-inner {
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 1rem 1.25rem 0;
-}
-
-.rtt-hero {
-  padding-top: 0;
-  padding-bottom: 1.35rem;
-}
-
-.rtt-hero-kicker {
-  font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--rtt-red);
-}
-
-.rtt-hero-title {
-  margin-top: 0.7rem;
-  font-size: clamp(3.25rem, 14vw, 7.5rem);
-  line-height: 0.82;
-  letter-spacing: -0.085em;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
-}
-
-.rtt-hero-subtitle {
-  margin-top: 1rem;
-  max-width: 42rem;
-  font-size: 0.96rem;
-  line-height: 1.58;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--rtt-muted);
+@media (min-width: 768px) {
+  .rtt-page-inner,
+  .rtt-max {
+    padding: 2.5rem 2rem 4rem;
+  }
 }
 
 .rtt-section {
-  margin-top: 1.35rem;
+  margin-top: 2rem;
 }
 
 .rtt-list {
   display: grid;
-  gap: 0.8rem;
+  gap: 0.75rem;
 }
 
-.rtt-mobile-card {
-  border: 1px solid var(--rtt-line);
-  background: var(--rtt-panel-soft);
-  border-radius: 1.5rem;
-  padding: 1rem;
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.rtt-hero {
+  padding: 0.5rem 0 1.75rem;
 }
 
-.rtt-mobile-card-hot {
-  border-color: rgba(225, 6, 0, 0.42);
-  background: rgba(225, 6, 0, 0.1);
-  box-shadow: 0 0 32px rgba(225, 6, 0, 0.12);
-}
-
+.rtt-hero-kicker,
+.rtt-kicker,
 .rtt-mini-kicker {
-  font-size: 0.66rem;
-  font-weight: 900;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
   color: var(--rtt-red);
-}
-
-.rtt-compact-title {
-  font-size: 1.65rem;
-  line-height: 0.95;
-  letter-spacing: -0.055em;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.rtt-muted-line {
   font-size: 0.68rem;
   font-weight: 900;
-  letter-spacing: 0.13em;
+  line-height: 1;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--rtt-faint);
 }
 
-.rtt-bottom-safe {
-  padding-bottom: 6.5rem;
-}
-
-/* ============================================================
-   OPTIONAL OLD BOTTOM NAV CLASS
-   Current Nav.tsx uses Tailwind classes, but keep this in case
-   any page still references .rtt-bottom-nav.
-   ============================================================ */
-
-.rtt-bottom-nav {
-  position: fixed;
-  left: 0.75rem;
-  right: 0.75rem;
-  bottom: 0.75rem;
-  z-index: 60;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.25rem;
-  border: 1px solid var(--rtt-line);
-  border-radius: 1.6rem;
-  background: rgba(0, 0, 0, 0.9);
-  padding: 0.375rem;
-  backdrop-filter: blur(18px);
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.65);
-}
-
-.rtt-bottom-nav a {
-  display: flex;
-  min-height: 2.75rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 1.2rem;
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 0.62rem;
+.rtt-hero-title,
+.rtt-title {
+  margin-top: 0.8rem;
+  color: var(--rtt-text);
+  font-size: clamp(3.35rem, 13vw, 7.75rem);
   font-weight: 900;
+  font-style: italic;
+  line-height: 0.84;
+  letter-spacing: -0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
 }
 
-.rtt-bottom-nav a:active,
-.rtt-bottom-nav a:hover {
-  background: rgba(225, 6, 0, 0.22);
-  color: white;
+.rtt-hero-subtitle,
+.rtt-subtitle {
+  margin-top: 1rem;
+  max-width: 42rem;
+  color: var(--rtt-text-muted);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.7;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
-
-/* ============================================================
-   DESKTOP / TABLET
-   ============================================================ */
 
 @media (min-width: 768px) {
-  .rtt-shell {
-    padding: 2rem 2rem 7.5rem;
-  }
-
-  .rtt-page {
-    padding-bottom: 7.5rem;
-  }
-
-  .rtt-page-inner {
-    padding: 2rem 2rem 0;
-  }
-
-  .rtt-hero {
-    padding-top: 0.5rem;
-    padding-bottom: 2rem;
-  }
-
   .rtt-hero-subtitle,
   .rtt-subtitle {
     font-size: 1.2rem;
   }
+}
 
-  .rtt-section {
-    margin-top: 2rem;
-  }
+/* ============================================================
+   CARDS / BUTTONS
+   ============================================================ */
 
-  .rtt-mobile-card {
-    padding: 1.25rem;
-    border-radius: 1.75rem;
-  }
+.rtt-mobile-card,
+.rtt-card {
+  border: 1px solid var(--rtt-border);
+  border-radius: 1.5rem;
+  background: var(--rtt-card);
+  box-shadow: var(--rtt-shadow);
+}
 
-  .rtt-compact-title {
-    font-size: 2rem;
+@media (min-width: 768px) {
+  .rtt-mobile-card,
+  .rtt-card {
+    border-radius: 2rem;
   }
+}
 
-  .rtt-bottom-nav {
-    left: 50%;
-    right: auto;
-    width: min(640px, calc(100vw - 2rem));
-    transform: translateX(-50%);
-  }
+.rtt-mobile-card {
+  padding: 1.25rem;
+}
+
+.rtt-mobile-card-hot {
+  background: var(--rtt-card-hot);
+  border-color: var(--rtt-border-hot);
+  box-shadow: var(--rtt-glow);
+}
+
+.rtt-cta,
+.rtt-secondary {
+  display: inline-flex;
+  min-height: 3.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.5rem;
+  padding: 1rem 1.25rem;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: transform 160ms ease, opacity 160ms ease, border-color 160ms ease;
+}
+
+.rtt-cta:hover,
+.rtt-secondary:hover {
+  transform: translateY(-1px);
+}
+
+.rtt-cta {
+  background: var(--rtt-red) !important;
+  color: #ffffff !important;
+  box-shadow: var(--rtt-glow);
+}
+
+.rtt-secondary {
+  border: 1px solid var(--rtt-border) !important;
+  background: var(--rtt-card) !important;
+  color: var(--rtt-text) !important;
+}
+
+.rtt-secondary:hover {
+  border-color: var(--rtt-red) !important;
+}
+
+.rtt-muted-line {
+  color: var(--rtt-text-faint);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.rtt-compact-title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.rtt-input {
+  width: 100%;
+  border: 1px solid var(--rtt-border);
+  border-radius: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 1rem 1.25rem;
+  color: var(--rtt-text);
+  outline: none;
+}
+
+.rtt-input::placeholder {
+  color: var(--rtt-text-faint);
+}
+
+.rtt-input:focus {
+  border-color: var(--rtt-red);
+}
+
+/* ============================================================
+   STREET RED VISUAL PACKAGE
+   ============================================================ */
+
+html[data-rtt-skin="street-red"] .rtt-page::before,
+html[data-rtt-skin="street-red"] .rtt-shell::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(115deg, transparent 0%, transparent 62%, rgba(239, 0, 0, 0.08) 62%, transparent 72%),
+    radial-gradient(circle at 10% 90%, rgba(239, 0, 0, 0.12), transparent 24%);
+}
+
+html[data-rtt-skin="street-red"] main,
+html[data-rtt-skin="street-red"] header,
+html[data-rtt-skin="street-red"] nav,
+html[data-rtt-skin="street-red"] section {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-rtt-skin="street-red"] .rtt-hero-title,
+html[data-rtt-skin="street-red"] .rtt-title {
+  text-shadow:
+    0 0 18px rgba(239, 0, 0, 0.24),
+    0 8px 0 rgba(0, 0, 0, 0.55);
+}
+
+html[data-rtt-skin="street-red"] .rtt-mobile-card,
+html[data-rtt-skin="street-red"] .rtt-card {
+  backdrop-filter: blur(14px);
+}
+
+html[data-rtt-skin="street-red"] .rtt-cta {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+html[data-rtt-skin="street-red"] .rtt-mobile-card-hot {
+  background:
+    linear-gradient(135deg, rgba(255, 16, 16, 0.98), rgba(120, 0, 0, 0.95));
 }

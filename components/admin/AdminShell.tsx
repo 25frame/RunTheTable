@@ -8,18 +8,20 @@ import type { ReactNode } from "react";
 const adminLinks = [
   ["/admin/dashboard", "Dashboard"],
   ["/admin/qr", "QR"],
-  ["/admin/places", "Places"],
-  ["/admin/config", "Config"],
   ["/admin/control", "Control"],
   ["/admin/matches", "Scoring"],
   ["/admin/players", "Players"],
   ["/admin/create-match", "Match"],
   ["/admin/create-player", "Player"],
+  ["/admin/places", "Places"],
+  ["/admin/config", "Config"],
+  ["/admin/skins", "Skins"],
   ["/admin/users", "Users"],
   ["/admin/health", "Health"],
   ["/admin/setup", "Setup"],
   ["/live", "Public"],
 ] as const;
+
 export function AdminShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();

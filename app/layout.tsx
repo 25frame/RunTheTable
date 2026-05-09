@@ -1,24 +1,25 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
-import { SwipeNavigator } from "@/components/SwipeNavigator";
+import { ThemeRuntime } from "@/components/ThemeRuntime";
 
 export const metadata: Metadata = {
   title: "Run The Table",
-  description: "RTT NYC Street Table Tennis",
+  description:
+    "RTT NYC street table tennis scoring, live board, player check-in, and places to play.",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en">
+    <html lang="en" data-rtt-skin="default">
       <body>
-        <SwipeNavigator />
+        <ThemeRuntime />
         <Nav />
-        <div className="relative z-10">{children}</div>
+        {children}
       </body>
     </html>
   );
